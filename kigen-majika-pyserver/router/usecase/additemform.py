@@ -13,6 +13,7 @@ class AddItemFormResult(htmlcontext.HtmlContext):
     POST_JAN_CODE: str = htmlname.POSTNAME.JAN_CODE.value
     POST_NAME: str = htmlname.POSTNAME.NAME.value
     POST_INVENTORY: str = htmlname.POSTNAME.INVENTORY.value
+    POST_PLACE: str = htmlname.POSTNAME.PLACE.value
     POST_CATEGORY: str = htmlname.POSTNAME.CATEGORY.value
     POST_MANUFACTURER: str = htmlname.POSTNAME.MANUFACTURER.value
     POST_TEXT: str = htmlname.POSTNAME.TEXT.value

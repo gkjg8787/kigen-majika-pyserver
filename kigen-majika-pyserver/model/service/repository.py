@@ -181,7 +181,7 @@ class ItemRepository(IItemRepository):
 
     async def _find_by_id(self, id: int, db: AsyncSession) -> Item | None:
         stmt = (
-            select(ItemInventory, ItemName, ItemCategory, ItemMemo)
+            select(ItemInventory, ItemName, ItemCategory, ItemManufacturer, ItemMemo)
             .select_from(ItemInventory)
             .join(ItemName, ItemInventory.jan_code == ItemName.jan_code)
             .join(ItemCategory, ItemInventory.jan_code == ItemCategory.jan_code)
@@ -202,7 +202,7 @@ class ItemRepository(IItemRepository):
     async def find_all(self) -> list[Item]:
         db = self.session
         stmt = (
-            select(ItemInventory, ItemName, ItemCategory, ItemMemo)
+            select(ItemInventory, ItemName, ItemCategory, ItemManufacturer, ItemMemo)
             .select_from(ItemInventory)
             .join(ItemName, ItemInventory.jan_code == ItemName.jan_code)
             .join(ItemCategory, ItemInventory.jan_code == ItemCategory.jan_code)
