@@ -1,0 +1,43 @@
+{% extends "shared/base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}" type="text/css">
+    <title>アイテム編集</title>
+    {% if is_next_page %}
+    <meta http-equiv="refresh" content=" 3; url={{ url_for('read_users_items') }}">
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <h1>アイテム編集</h1>
+    {%- if not is_next_page %}
+    <form action="{{ url_for('read_users_items_edit_post') }}" method="post">
+        <p>ID：{{ id }}<input type="hidden" name="{{ POST_ID }}" value="{{ id }}"></p>
+        <p>JANコード： <input type="text" name="{{ POST_JAN_CODE }}" class="jan_code_input" value="{{ jan_code }}" required></p>
+        <p>商品名： <input type="text" name="{{ POST_NAME }}" value="{{ name }}"></p>
+        <p>在庫： <input type="number" name="{{ POST_INVENTORY }}" value="{{ inventory }}"></p>
+        <p>保管場所： <input type="text" name="{{ POST_PLACE }}" value="{{ place }}"></p>
+        <p>カテゴリー： <input type="text" name="{{ POST_CATEGORY }}" value="{{ category }}"></p>
+        <p>メーカー： <input type="text" name="{{ POST_MANUFACTURER }}" value="{{ manufacturer }}"></p>
+        <p>備考： <input type="text" name="{{ POST_TEXT }}" value="{{ text }}"></p>
+        <p>消費期限： <input type="date" name="{{ POST_EXPIRY_DATE }}" value="{{ expiry_date }}"></p>
+        <input type="hidden" name="{{POST_TIMEZONE}}" value="{{ local_timezone }}">
+        <p>登録日： {{ created_at }}</p>
+        <p>更新日： {{ updated_at }}</p>
+        {%- if error_msg %}
+        <p style="color:red;">{{ error_msg }}</p>
+        {%- endif %}
+        <p><input type="submit" value="変更する"></p>
+    </form>
+    <p><form action="{{ url_for('read_users_items_delete') }}" method="post">
+        <input type="hidden" name="{{ POST_ID }}" value="{{ id }}">
+        <input type="submit" value="削除する">
+    </form></p>
+    {%- else %}
+    <p>
+      変更しました。
+      <br>3秒後、戻ります。
+    </p>
+    {%- endif %}
+    <p><a href="{{ url_for('read_users_items') }}" class="plain-link">アイテム一覧へ戻る</a></p>
+{% endblock %}

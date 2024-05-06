@@ -1,0 +1,50 @@
+{% extends "shared/base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}" type="text/css">
+    <title>アイテム一覧</title>
+{% endblock %}
+
+{% block body %}
+    <h1>アイテム一覧</h1>
+    <h2>操作メニュー</h2>
+    <p><a href="{{ url_for('read_users_items_add') }}" class="like_button_link">アイテムを追加</a></p>
+    <h3>フィルタ</h3>
+    <p>
+        件数
+        {{ items_length }}件
+    </p>
+    <table class="item_list_table">
+        <tr>
+            <th>id</th>
+            <th>商品名</th>
+            <th>JANコード</th>
+            <th>在庫数</th>
+            <th>カテゴリー</th>
+            <th>メーカー</th>
+            <th>保管場所</th>
+            <th>消費期限</th>
+            <th>備考</th>
+            <th>更新日</th>
+            <th>登録日</th>
+        </tr>
+        {%- for row in items %}
+        <tr>
+            <td>{{ row["id"] }}</td>
+            <td>{{row["name"]}}</td>
+            <td>{{row["jan_code"]}}</td>
+            <td>{{row["inventory"]}}</td>
+            <td>{{row["category"]}}</td>
+            <td>{{row["manufacturer"]}}</td>
+            <td>{{row["place"]}}</td>
+            <td>{{row["expiry_date"]}}</td>
+            <td>{{row["text"]}}</td>
+            <td>{{row["updated_at"]}}</td>
+            <td>{{row["created_at"]}}</td>
+            <td class="noborder nobreak">
+                <a href="{{ url_for('read_users_items_edit') }}?{{ PARAM_ID }}={{ row['id'] }}" class="like_button_link">編集</a>
+            </td>
+        </tr>
+        {%- endfor %}
+    </table>
+{% endblock %}

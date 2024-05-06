@@ -1,0 +1,51 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=EUC-JP">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Pragma" content="no-cache">
+<link rel="stylesheet" href="../../css/catalog.css" type="text/css">
+<script type="text/javascript" src="./janken.js"></script>
+<TITLE>JANコード 商品検索</TITLE>
+<script type="text/javascript">
+//<![CDATA[
+
+//]]>
+</script>
+<style type="text/css">
+<!--
+body {margin: 0px;}
+a         { text-decoration:none; font-Size:11px; line-height:12px; }
+a:link    { color:#0040D0; text-decoration:none; }
+a:visited { color:#6000D0; text-decoration:none; }
+a:active  { color:#000080; text-decoration:none; }
+a:hover   { color:#008020; text-decoration:underline; }
+
+table.goods { border-collapse:collapse; margin: 1px;}
+td.goodskey { padding: 1px; border: 1px solid #008020; background-color:#F0F0C8; color:#000000; font-Size:11px; line-height:12px; } 
+td.goodsval { padding: 1px; border: 1px solid #008020; background-color:#FFFFF0; color:#000000; font-Size:11px; line-height:12px; } 
+-->
+</style>
+</HEAD>  
+<body onload="document.inpfrm.jan.focus();">
+<div class="j11">
+  <form name="inpfrm" action="#" method="post">
+    <input type="text" name="dummy" size="1" style="visibility:hidden">
+    JANコード <input type="text" name="jan" size="15" value="4" />
+    <input type="button" name="gobtn" value="商品検索" onclick="goSearch();return false;">
+    <!--
+      // Googleのアクセス解析。仕様が変わっていたため、これがあると１回しか検索できないので削除 2008/10/29
+      onclick="_IG_Analytics('UA-715381-13', '/gadget/jan/GoodsSearch/click');"  
+    -->
+  </form>
+  <br><br>JANコードは数字（先頭は 45, 49, 978）、ISBNコードは数字（Xが付く場合もあのます）を入力してください。<br /></div>
+
+
+<script>
+  //_IG_Analytics("UA-715381-13", "/gadget/jan/janken.xml");
+</script>
+
+
+</BODY>
+</HTML>
