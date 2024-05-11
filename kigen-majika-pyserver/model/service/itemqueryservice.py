@@ -125,7 +125,7 @@ class ItemQueryDictService(IItemQueryService):
 
     async def find_all(self, itemquerycommand: ItemQueryCommand) -> ItemQueryResult:
         results: list[Item] = []
-        for k, v in self.database:
+        for k, v in self.database.items():
             if itemquerycommand.stock:
                 if not await self.is_stock(itemquerycommand=itemquerycommand, item=v):
                     continue

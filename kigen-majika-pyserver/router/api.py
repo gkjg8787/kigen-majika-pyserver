@@ -32,6 +32,7 @@ from model.service import (
     ItemIdentity,
 )
 from model.domain import ItemFactory
+import settings
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -67,6 +68,7 @@ async def read_api_itemname(
     results = await OnlineItemName(
         repository=ItemNameRepository(db),
         jancodeinfocreator=OnlineJanCodeInfoCreator(),
+        get_info_online=settings.GET_INFO_ONLINE,
     ).get_or_create(jan_code=jan_code)
     return results
 

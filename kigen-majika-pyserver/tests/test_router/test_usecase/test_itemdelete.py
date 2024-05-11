@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from router.usecase import itemdelete
+from router.usecase.api import itemdelete
 from router.param import ItemDeleteParam
 from model.service import ItemDictRepository
 from model.domain import Item, ItemFactory

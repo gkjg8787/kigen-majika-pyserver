@@ -61,7 +61,7 @@ class TestDeleteItemInitForm:
         item = get_item(id=target_id, created_at=now, updated_at=now)
         itemlistresult = ItemListResult(items=[item])
         m1 = mocker.patch(
-            "router.usecase.edititemform.httpx.AsyncClient.post",
+            "router.usecase.html.edititemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(itemlistresult.model_dump_json())
             ),
@@ -80,7 +80,7 @@ class TestDeleteItemForm:
         deleteitempostform = DeleteItemPostForm(id=str(target_id), name="")
         itemdeleteresult = ItemDeleteResult()
         m1 = mocker.patch(
-            "router.usecase.edititemform.httpx.AsyncClient.post",
+            "router.usecase.html.edititemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(itemdeleteresult.model_dump_json())
             ),

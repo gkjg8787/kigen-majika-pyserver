@@ -69,7 +69,7 @@ class TestAddItemForm:
 
         icr = ItemCreateResult(item=item, error_msg="")
         m2 = mocker.patch(
-            "router.usecase.additemform.httpx.AsyncClient.post",
+            "router.usecase.html.additemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(icr.model_dump_json())
             ),

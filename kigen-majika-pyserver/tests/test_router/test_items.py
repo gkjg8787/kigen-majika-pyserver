@@ -39,12 +39,12 @@ def is_html(text):
 async def test_read_users_items(test_db, mocker):
     itemlistgetform = ItemListGetForm()
     m1 = mocker.patch(
-        "router.usecase.itemlist_in_html.ItemListInHTML.execute",
+        "router.usecase.html.itemlist_in_html.ItemListInHTML.execute",
         return_value=ItemListInHTMLResultFactory.create(
             itemlistgetform=itemlistgetform, items=[]
         ),
     )
-    response = client.get(f"{prefix}/", param=itemlistgetform.model_dump_json())
+    response = client.get(f"{prefix}/", params=itemlistgetform.model_dump_json())
     assert response.status_code == 200
     is_html(response.text)
 
@@ -62,7 +62,7 @@ async def test_read_users_items_add_post(test_db, mocker):
     jan_code = "0123456789012"
     additemresult = AddItemFormResult(is_next_page=True, name=name, jan_code=jan_code)
     m1 = mocker.patch(
-        "router.usecase.additemform.AddItemForm.execute",
+        "router.usecase.html.additemform.AddItemForm.execute",
         return_value=additemresult,
     )
     additempostform = AddItemPostForm(
@@ -88,7 +88,7 @@ async def test_read_users_items_edit(test_db, mocker):
     target_id = 1
     edititemgetform = EditItemGetForm(id=str(target_id))
     m1 = mocker.patch(
-        "router.usecase.edititemform.EditItemInitForm.execute",
+        "router.usecase.html.edititemform.EditItemInitForm.execute",
         return_value=EditItemFormResult(id=target_id),
     )
     response = client.get(
@@ -114,7 +114,7 @@ async def test_read_users_items_edit_post(test_db, mocker):
         local_timezone=htmlname.LocalTimeZone.JST,
     )
     m1 = mocker.patch(
-        "router.usecase.edititemform.EditItemForm.execute",
+        "router.usecase.html.edititemform.EditItemForm.execute",
         return_value=EditItemFormResult(
             is_next_page=True, **edititempostform.model_dump()
         ),
@@ -131,7 +131,7 @@ async def test_read_users_items_delete(test_db, mocker):
     target_id = 1
     deleteitempostform = DeleteItemPostForm(id=str(target_id), name="")
     m1 = mocker.patch(
-        "router.usecase.deleteitemform.DeleteItemInitForm.execute",
+        "router.usecase.html.deleteitemform.DeleteItemInitForm.execute",
         return_value=DeleteItemFormResult(id=target_id),
     )
     response = client.post(
@@ -146,7 +146,7 @@ async def test_read_users_items_delete_result(test_db, mocker):
     target_id = 1
     deleteitempostform = DeleteItemPostForm(id=str(target_id), name="test")
     m1 = mocker.patch(
-        "router.usecase.deleteitemform.DeleteItemForm.execute",
+        "router.usecase.html.deleteitemform.DeleteItemForm.execute",
         return_value=DeleteItemFormResult(id=target_id, name="test", is_next_page=True),
     )
     response = client.post(

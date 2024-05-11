@@ -3,7 +3,7 @@ from typing import Any, Coroutine
 
 import pytest
 
-from router.usecase import itemsname
+from router.usecase.api import itemsname
 from model.service import ItemNameDictRepository, IJanCodeInfoCreator
 from model.service.jancode_item import JanCodeInfo
 from model.database import ItemName

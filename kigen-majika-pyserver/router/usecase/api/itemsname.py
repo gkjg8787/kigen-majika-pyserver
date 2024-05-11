@@ -29,18 +29,25 @@ class ItemName:
 class OnlineItemName:
     itemnamerepository: IItemNameRepository
     jancodeinfocreator: IJanCodeInfoCreator
+    get_info_online: bool
 
     def __init__(
-        self, repository: IItemNameRepository, jancodeinfocreator: IJanCodeInfoCreator
+        self,
+        repository: IItemNameRepository,
+        jancodeinfocreator: IJanCodeInfoCreator,
+        get_info_online: bool = True,
     ):
         self.itemnamerepository = repository
         self.jancodeinfocreator = jancodeinfocreator
+        self.get_info_online = get_info_online
 
     async def get_or_create(self, jan_code: str) -> ItemNameResult:
         ret = ItemNameResult(jan_code=jan_code)
         itemname = await self.itemnamerepository.find_by_jan_code(jan_code=jan_code)
         if itemname:
             ret.name = itemname.name
+            return ret
+        if not self.get_info_online:
             return ret
         jancodeinfo = await self.jancodeinfocreator.create(jan_code=jan_code)
         if jancodeinfo.name:

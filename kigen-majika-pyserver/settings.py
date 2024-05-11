@@ -12,3 +12,4 @@ DATABASES = {
     },
     "is_echo": False,
 }
+GET_INFO_ONLINE = True

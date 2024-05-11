@@ -60,7 +60,7 @@ class TestEditItemInitForm:
         now = datetime.now(timezone.utc)
         item = get_item(id=target_id, created_at=now, updated_at=now)
         m1 = mocker.patch(
-            "router.usecase.edititemform.GetOneItemForm.execute",
+            "router.usecase.html.edititemform.GetOneItemForm.execute",
             return_value=readitemform.GetOneItemResult(item=item),
         )
         result = await EditItemInitForm(
@@ -75,7 +75,7 @@ class TestEditItemInitForm:
         edititemgetform = EditItemGetForm(id=str(target_id))
         error_msg = "Not Found Item"
         m1 = mocker.patch(
-            "router.usecase.edititemform.GetOneItemForm.execute",
+            "router.usecase.html.edititemform.GetOneItemForm.execute",
             return_value=readitemform.GetOneItemResult(error_msg=error_msg),
         )
         result = await EditItemInitForm(
@@ -124,7 +124,7 @@ class TestEditItemForm:
             is_update=False, error_msg=f"Not Found Data id={target_id}"
         )
         m1 = mocker.patch(
-            "router.usecase.edititemform.httpx.AsyncClient.post",
+            "router.usecase.html.edititemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(itemupdateresult.model_dump_json())
             ),
@@ -146,7 +146,7 @@ class TestEditItemForm:
         item = get_item(id=target_id)
         itemupdateresult = ItemUpdateResult(is_update=True, item=item)
         m1 = mocker.patch(
-            "router.usecase.edititemform.httpx.AsyncClient.post",
+            "router.usecase.html.edititemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(itemupdateresult.model_dump_json())
             ),

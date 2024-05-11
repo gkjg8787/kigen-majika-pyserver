@@ -24,7 +24,7 @@ class TestItemListInHTML:
     @pytest.mark.asyncio
     async def test_execute_no_data(self, test_db, mocker):
         m1 = mocker.patch(
-            "router.usecase.additemform.httpx.AsyncClient.post",
+            "router.usecase.html.itemlist_in_html.httpx.AsyncClient.post",
             return_value=DummyRequestResult(return_value=[]),
         )
         itemlistgetform = ItemListGetForm()
@@ -71,7 +71,7 @@ class TestItemListInHTML:
         items = [self.get_item(id=target_id, created_at=now, updated_at=now)]
         get_res = ItemListResult(items=items)
         m1 = mocker.patch(
-            "router.usecase.additemform.httpx.AsyncClient.post",
+            "router.usecase.html.itemlist_in_html.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(get_res.model_dump_json())
             ),

@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import BaseModel
 
-from router.usecase import itemcreate
+from router.usecase.api import itemcreate
 from model.domain import ItemFactory
 from model.service import ItemDictRepository, ItemDictIdentity
 

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from router.usecase import itemupdate
+from router.usecase.api import itemupdate
 from router.param import ItemUpdateParam
 from model.service import ItemDictRepository
 from model.domain import Item, ItemFactory
