@@ -3,8 +3,10 @@ import json
 
 import pytest
 
+from router.param import ItemListGetForm
 from router.usecase import ItemListInHTML, ItemListInHTMLResult, ItemListResult
-from router.usecase.shared import util as sutil
+from router.usecase.html.itemlist_in_html import ItemListInHTMLResultFactory
+from router.usecase.shared import util as sutil, htmlname
 from model.domain import ItemFactory
 
 
@@ -22,11 +24,18 @@ class TestItemListInHTML:
     @pytest.mark.asyncio
     async def test_execute_no_data(self, test_db, mocker):
         m1 = mocker.patch(
-            "router.usecase.additemform.httpx.AsyncClient.get",
+            "router.usecase.additemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(return_value=[]),
         )
-        res = await ItemListInHTML(api_url="dummy", local_timezone=sutil.JST).execute()
-        comparing_data = ItemListInHTMLResult()
+        itemlistgetform = ItemListGetForm()
+        res = await ItemListInHTML(
+            api_url="dummy", local_timezone=sutil.JST, itemlistgetform=itemlistgetform
+        ).execute()
+        comparing_data = ItemListInHTMLResultFactory.create(
+            itemlistgetform=itemlistgetform,
+            items=[],
+            error_msg=htmlname.HTMLViewError.NOT_RESULT_API.jname,
+        )
         assert comparing_data == res
 
     def get_item(
@@ -62,14 +71,18 @@ class TestItemListInHTML:
         items = [self.get_item(id=target_id, created_at=now, updated_at=now)]
         get_res = ItemListResult(items=items)
         m1 = mocker.patch(
-            "router.usecase.additemform.httpx.AsyncClient.get",
+            "router.usecase.additemform.httpx.AsyncClient.post",
             return_value=DummyRequestResult(
                 return_value=json.loads(get_res.model_dump_json())
             ),
         )
-        res = await ItemListInHTML(api_url="dummy", local_timezone=sutil.JST).execute()
-        comparing_data = ItemListInHTMLResult(
-            **get_res.model_dump(), items_length=len(get_res.items)
+        itemlistgetform = ItemListGetForm()
+        res = await ItemListInHTML(
+            api_url="dummy", local_timezone=sutil.JST, itemlistgetform=itemlistgetform
+        ).execute()
+        comparing_data = ItemListInHTMLResultFactory.create(
+            **get_res.model_dump(),
+            itemlistgetform=itemlistgetform,
         )
         assert comparing_data == res
         d = datetime.now(timezone.utc)

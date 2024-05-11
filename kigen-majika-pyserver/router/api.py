@@ -7,6 +7,7 @@ from model.database import get_async_session
 from router.usecase import (
     OnlineItemName,
     ItemList,
+    ItemOne,
     ItemCreate,
     ItemUpdate,
     ItemDelete,
@@ -17,6 +18,7 @@ from router.usecase import (
     ItemDeleteResult,
 )
 from router.param import (
+    ItemListRequestParam,
     ItemUpdateParam,
     ItemCreateParam,
     ItemDeleteParam,
@@ -24,6 +26,7 @@ from router.param import (
 )
 from model.service import (
     ItemRepository,
+    ItemQueryService,
     ItemNameRepository,
     OnlineJanCodeInfoCreator,
     ItemIdentity,
@@ -33,12 +36,15 @@ from model.domain import ItemFactory
 router = APIRouter(prefix="/api", tags=["api"])
 
 
-@router.get("/items", response_model=ItemListResult)
+@router.post("/items", response_model=ItemListResult)
 async def read_api_items(
     request: Request,
+    itemlistrequestparam: ItemListRequestParam,
     db: AsyncSession = Depends(get_async_session),
 ):
-    results = await ItemList(ItemRepository(db)).get_all()
+    results = await ItemList(ItemQueryService(db)).get(
+        itemlistrequestparam=itemlistrequestparam
+    )
     return results
 
 
@@ -48,9 +54,7 @@ async def read_api_item_detail(
     itemrequestparam: ItemRequestParam,
     db: AsyncSession = Depends(get_async_session),
 ):
-    results = await ItemList(ItemRepository(db)).get_one(
-        itemrequestparam=itemrequestparam
-    )
+    results = await ItemOne(ItemRepository(db)).get(itemrequestparam=itemrequestparam)
     return results
 
 

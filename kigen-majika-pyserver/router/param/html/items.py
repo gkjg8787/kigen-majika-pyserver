@@ -2,52 +2,7 @@ from datetime import datetime, timezone, timedelta
 
 from fastapi import Form
 
-from pydantic import BaseModel, field_validator
-
-
-class ItemRequestParam(BaseModel):
-    id: int
-
-
-class ItemCreateParam(BaseModel):
-    name: str | None = None
-    jan_code: str
-    inventory: int | None = None
-    place: str | None = None
-    category: str | None = None
-    manufacturer: str | None = None
-    text: str | None = None
-    expiry_date: datetime | None = None
-
-    @field_validator("expiry_date")
-    @classmethod
-    def toUtc(cls, v: datetime | None):
-        if not v:
-            return v
-        return v.replace(tzinfo=timezone.utc)
-
-
-class ItemUpdateParam(BaseModel):
-    id: int
-    name: str
-    jan_code: str
-    inventory: int
-    place: str
-    category: str
-    manufacturer: str
-    text: str
-    expiry_date: datetime | None
-
-    @field_validator("expiry_date")
-    @classmethod
-    def toUtc_expiry_date(cls, v: datetime | None):
-        if not v:
-            return v
-        return v.replace(tzinfo=timezone.utc)
-
-
-class ItemDeleteParam(BaseModel):
-    id: int
+from pydantic import BaseModel
 
 
 def toUtc(base: datetime, local_timezone: str):
@@ -64,7 +19,19 @@ def toUtc(base: datetime, local_timezone: str):
         t += timedelta(minutes=int(timearray[MINUTE]))
     if len(timearray) > SECOND:
         t += timedelta(seconds=int(timearray[SECOND]))
-    return base.replace(tzinfo=timezone(t))
+    return base.replace(tzinfo=timezone(t)).astimezone(timezone.utc)
+
+
+class ItemListGetForm(BaseModel):
+    isort: int = 0
+    stock: int = 0
+
+    def __init__(self, isort: str = "", stock: str = ""):
+        super().__init__()
+        if isort and isort.isdigit():
+            self.isort = int(isort)
+        if stock and stock.isdigit():
+            self.stock = int(stock)
 
 
 class AddItemPostForm(BaseModel):

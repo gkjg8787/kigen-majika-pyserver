@@ -28,12 +28,12 @@ prefix = "/api"
 
 @pytest.mark.asyncio
 async def test_read_api_items_no_data(test_db, mocker):
-    response = client.get(f"{prefix}/items/")
-    assert response.status_code == 200
     m = mocker.patch(
-        "router.usecase.ItemList.get_all",
+        "router.usecase.ItemList.get",
         return_value=ItemListResult(items=[]),
     )
+    response = client.post(f"{prefix}/items/", json={})
+    assert response.status_code == 200
     assert response.json() == ItemListResult().model_dump()
 
 
@@ -60,10 +60,10 @@ def create_item(id: int, expiry_date: datetime | None = None):
 async def test_read_api_items_one_data(test_db, mocker):
     item = create_item(id=1)
     m = mocker.patch(
-        "router.usecase.ItemList.get_all",
+        "router.usecase.ItemList.get",
         return_value=ItemListResult(items=[item]),
     )
-    response = client.get(f"{prefix}/items/")
+    response = client.post(f"{prefix}/items/", json={})
     assert response.status_code == 200
     assert response.json() == json.loads(ItemListResult(items=[item]).model_dump_json())
 
@@ -73,10 +73,10 @@ async def test_read_api_items_three_data(test_db, mocker):
 
     itemlist = [create_item(id=1), create_item(id=2), create_item(id=3)]
     m = mocker.patch(
-        "router.usecase.ItemList.get_all",
+        "router.usecase.ItemList.get",
         return_value=ItemListResult(items=copy.deepcopy(itemlist)),
     )
-    response = client.get(f"{prefix}/items/")
+    response = client.post(f"{prefix}/items/", json={})
     assert response.status_code == 200
     assert response.json() == json.loads(
         ItemListResult(items=itemlist).model_dump_json()
@@ -88,7 +88,7 @@ async def test_read_api_item_detail_no_data(test_db, mocker):
     target_id = 1
     irp = ItemRequestParam(id=target_id)
     m = mocker.patch(
-        "router.usecase.ItemList.get_one",
+        "router.usecase.ItemOne.get",
         return_value=ItemListResult(items=[]),
     )
     response = client.post(
@@ -104,7 +104,7 @@ async def test_read_api_item_detail_exist_data(test_db, mocker):
     item = create_item(id=target_id)
     irp = ItemRequestParam(id=target_id)
     m = mocker.patch(
-        "router.usecase.ItemList.get_one",
+        "router.usecase.ItemOne.get",
         return_value=ItemListResult(items=[item]),
     )
     response = client.post(

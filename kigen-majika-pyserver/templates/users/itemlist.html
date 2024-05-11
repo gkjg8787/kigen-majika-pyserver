@@ -11,6 +11,31 @@
     <p><a href="{{ url_for('read_users_items_add') }}" class="like_button_link">アイテムを追加</a></p>
     <h3>フィルタ</h3>
     <p>
+        {%- with
+            FORM_METHOD = inventory_filter.form_method,
+            FORM_ACTION = inventory_filter.form_action,
+            MENU_TITLE = inventory_filter.title,
+            MENU_NAME = inventory_filter.input_name,
+            menu_list = inventory_filter.menu_list,
+            hidden_input_dict = hidden_input_dict
+        %}
+        {%- include "shared/pulldown_menu_filter.html" %}
+        {%- endwith %}
+    </p>
+    <p>
+        {%- with
+            FORM_METHOD = sort_order.form_method,
+            FORM_ACTION = sort_order.form_action,
+            MENU_TITLE = sort_order.title,
+            MENU_NAME = sort_order.input_name,
+            menu_list = sort_order.menu_list,
+            hidden_input_dict = hidden_input_dict
+        %}
+        {%- include "shared/pulldown_menu_sort.html" %}
+        {%- endwith %}
+    </p>
+    <p><a href="{{ url_for('read_users_items') }}" class="plain-link">フィルタクリア</a></p>
+    <p>
         件数
         {{ items_length }}件
     </p>

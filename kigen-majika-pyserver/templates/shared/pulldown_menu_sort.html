@@ -1,0 +1,11 @@
+{%- with
+    FORM_METHOD = FORM_METHOD,
+    FORM_ACTION = FORM_ACTION,
+    MENU_TITLE = MENU_TITLE,
+    MENU_NAME = MENU_NAME,
+    menu_list = menu_list,
+    hidden_input_dict = hidden_input_dict,
+    OPTION_TEXT_SUFFIX = "順"
+%}
+{%- include "shared/pulldown_menu_filter.html" %}
+{%- endwith %}

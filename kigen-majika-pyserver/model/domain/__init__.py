@@ -5,6 +5,8 @@ from .items import (
     ItemFactory,
     ItemCategoryData,
     ItemManufacturerData,
+    ItemSort,
+    ItemStockFilter,
 )
 
 __all__ = [
@@ -17,4 +19,7 @@ __all__ = [
     "IItemFactory",
     # factory
     "ItemFactory",
+    # Enum
+    "ItemSort",
+    "ItemStockFilter",
 ]

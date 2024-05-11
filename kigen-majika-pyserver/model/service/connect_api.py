@@ -1,4 +1,3 @@
-from ..domain import Item
 import httpx
 
 from model.service import IJanCodeInfoCreator

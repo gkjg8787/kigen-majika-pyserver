@@ -17,8 +17,10 @@ from router.param import (
     EditItemGetForm,
     EditItemPostForm,
     DeleteItemPostForm,
+    ItemListGetForm,
 )
-from router.usecase.shared import htmlname
+from router.usecase.shared import htmlname, htmlform
+from router.usecase.html.itemlist_in_html import ItemListInHTMLResultFactory
 
 client = TestClient(app)
 prefix = "/items"
@@ -35,11 +37,14 @@ def is_html(text):
 
 @pytest.mark.asyncio
 async def test_read_users_items(test_db, mocker):
+    itemlistgetform = ItemListGetForm()
     m1 = mocker.patch(
         "router.usecase.itemlist_in_html.ItemListInHTML.execute",
-        return_value=ItemListInHTMLResult(),
+        return_value=ItemListInHTMLResultFactory.create(
+            itemlistgetform=itemlistgetform, items=[]
+        ),
     )
-    response = client.get(f"{prefix}/")
+    response = client.get(f"{prefix}/", param=itemlistgetform.model_dump_json())
     assert response.status_code == 200
     is_html(response.text)
 

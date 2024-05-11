@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 
 from router.param import (
+    ItemListGetForm,
     AddItemPostForm,
     EditItemGetForm,
     EditItemPostForm,
@@ -28,9 +29,13 @@ templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/", response_class=HTMLResponse)
-async def read_users_items(request: Request):
+async def read_users_items(
+    request: Request, itemlistgetform: ItemListGetForm = Depends()
+):
     result = await ItemListInHTML(
-        api_url=str(request.url_for("read_api_items")), local_timezone=s_util.JST
+        api_url=str(request.url_for("read_api_items")),
+        local_timezone=s_util.JST,
+        itemlistgetform=itemlistgetform,
     ).execute()
     ret = templates.TemplateResponse(
         request=request, name="users/itemlist.html", context=result.get_context()

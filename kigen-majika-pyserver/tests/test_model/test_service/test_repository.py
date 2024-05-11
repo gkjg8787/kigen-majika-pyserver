@@ -21,6 +21,7 @@ from model.database import (
     ItemMemo,
     ItemManufacturer,
 )
+from . import shared
 
 
 class TestItemNameRepository:
@@ -55,40 +56,6 @@ class TestItemNameRepository:
 
 class TestItemRepository:
 
-    @classmethod
-    def get_one_item(
-        cls,
-        id: int = 1,
-        name: str = "test",
-        jan_code: str = "0123456789012",
-        inventry: int = 1,
-        place: str = "closet",
-        category: str = "any",
-        manufacturer: str = "maker",
-        text: str = "memo",
-        expiry_date: datetime | None = None,
-        created_at: datetime | None = None,
-        updated_at: datetime | None = None,
-    ) -> Item:
-        now = datetime.now(timezone.utc)
-        if created_at is None:
-            created_at = now
-        if updated_at is None:
-            updated_at = now
-        return ItemFactory.create(
-            id=id,
-            name=name,
-            jan_code=jan_code,
-            inventory=inventry,
-            place=place,
-            category=category,
-            manufacturer=manufacturer,
-            text=text,
-            expiry_date=expiry_date,
-            created_at=created_at,
-            updated_at=updated_at,
-        )
-
     async def assert_comparing_item(self, db, item: Item):
         iname: ItemName = await db.get(ItemName, item.jan_code)
         iinv: ItemInventory = await db.get(ItemInventory, item.id)
@@ -122,7 +89,7 @@ class TestItemRepository:
     async def test_save(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             await self.assert_comparing_item(db=db, item=item)
 
@@ -130,7 +97,7 @@ class TestItemRepository:
     async def test_save_update_name(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             item.name = "aaa"
             await repo.save(item)
@@ -140,7 +107,7 @@ class TestItemRepository:
     async def test_save_update_inventory(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             item.inventory = 99
             item.place = "another"
@@ -152,7 +119,7 @@ class TestItemRepository:
     async def test_save_update_category(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             item.category = "xxx"
             await repo.save(item)
@@ -162,7 +129,7 @@ class TestItemRepository:
     async def test_save_update_manufacturer(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             item.manufacturer = "xxx"
             await repo.save(item)
@@ -172,7 +139,7 @@ class TestItemRepository:
     async def test_save_update_memo(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             item.text = "kore ha memo desu."
             await repo.save(item)
@@ -182,7 +149,7 @@ class TestItemRepository:
     async def test_save_update_all(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
             item.name = "おいしい酢"
             item.inventory = 20
@@ -222,7 +189,7 @@ class TestItemRepository:
     async def test_find_by_jan_code_one_data(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item(
+            item: Item = shared.get_item(
                 expiry_date=datetime(2024, 12, 30, 0, 0, 0, tzinfo=timezone.utc)
             )
             await repo.save(item)
@@ -235,7 +202,7 @@ class TestItemRepository:
     async def test_find_by_id_one_data(self, test_db):
         async for db in test_db:
             repo = ItemRepository(db)
-            item: Item = self.get_one_item()
+            item: Item = shared.get_item()
             await repo.save(item)
 
             ret = await repo.find_by_id(item.id)
@@ -246,7 +213,7 @@ class TestItemRepository:
     async def test_find_all_three_data(self, test_db):
         def create_item(id: int):
             jan_code = str(id).zfill(13)
-            return self.get_one_item(
+            return shared.get_item(
                 id=id,
                 name=str(id),
                 jan_code=jan_code,
@@ -268,7 +235,7 @@ class TestItemRepository:
     async def test_delete_by_id(self, test_db):
         def create_item(id: int):
             jan_code = str(id).zfill(13)
-            return self.get_one_item(
+            return shared.get_item(
                 id=id,
                 name=str(id),
                 jan_code=jan_code,

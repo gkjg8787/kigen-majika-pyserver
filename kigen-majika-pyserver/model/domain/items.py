@@ -1,6 +1,6 @@
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
-
+from enum import Enum
 from pydantic import BaseModel, field_validator
 
 
@@ -105,3 +105,28 @@ class ItemFactory(IItemFactory):
             created_at=created_at,
             updated_at=updated_at,
         )
+
+
+class ItemSort(Enum):
+    NEAR_EXPIRY = (1, "消費期限が近い")
+    FAR_EXPIRY = (2, "消費期限が遠い")
+    OLD_REGIST = (3, "登録が古い")
+    NEW_REGIST = (4, "登録が新しい")
+    ITEMNAME_ASC = (5, "商品名昇")
+    ITEMNAME_DESC = (6, "商品名降")
+
+    def __init__(self, id: int, text: str):
+        self.id = id
+        self.ename = self.name.lower()
+        self.jname = text
+
+
+class ItemStockFilter(Enum):
+    ALL = (1, "全て")
+    IN_STOCK = (2, "在庫あり")
+    NO_STOCK = (3, "在庫なし")
+
+    def __init__(self, id: int, text: str):
+        self.id = id
+        self.ename = self.name.lower()
+        self.jname = text
