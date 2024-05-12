@@ -25,7 +25,10 @@ from router.usecase.shared import util as s_util
 
 router = APIRouter(prefix="/items", tags=["items"])
 templates = Jinja2Templates(directory="templates")
-# templates.env.filters["utcToLocaltime"] = s_util.utcTolocaltime
+templates.env.filters["toLocalTextFormat"] = s_util.toLocalTextFormat
+templates.env.filters["toLocalExpiryDateTextFormat"] = (
+    s_util.toLocalExpiryDateTextFormat
+)
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -61,7 +64,9 @@ async def read_users_items_add_post(
     result = await AddItemForm(
         jancodeinfocreator=ConnectToAPIJanCodeInfoCreator(
             url=str(
-                request.url_for("read_api_itemname", jan_code=additempostform.jan_code)
+                request.url_for(
+                    "read_api_item_jancodeinfo", jan_code=additempostform.jan_code
+                )
             )
         ),
         additempostform=additempostform,
@@ -82,6 +87,7 @@ async def read_users_items_edit(
     result = await EditItemInitForm(
         edititemgetform=edititemgetform,
         detail_api_url=str(request.url_for("read_api_item_detail")),
+        local_timezone=s_util.JST,
     ).execute()
     context = result.get_context()
     return templates.TemplateResponse(
@@ -99,6 +105,7 @@ async def read_users_items_edit_post(
         edititempostform=edititempostform,
         detail_api_url=str(request.url_for("read_api_item_detail")),
         update_api_url=str(request.url_for("read_api_item_update")),
+        local_timezone=s_util.JST,
     ).execute()
     context = result.get_context()
     return templates.TemplateResponse(
@@ -115,6 +122,7 @@ async def read_users_items_delete(
     result = await DeleteItemInitForm(
         deleteitempostform=deleteitempostform,
         detail_api_url=str(request.url_for("read_api_item_detail")),
+        local_timezone=s_util.JST,
     ).execute()
     context = result.get_context()
     return templates.TemplateResponse(
@@ -131,6 +139,7 @@ async def read_users_items_delete_result(
     result = await DeleteItemForm(
         deleteitempostform=deleteitempostform,
         delete_api_url=str(request.url_for("read_api_item_delete")),
+        local_timezone=s_util.JST,
     ).execute()
     context = result.get_context()
     return templates.TemplateResponse(

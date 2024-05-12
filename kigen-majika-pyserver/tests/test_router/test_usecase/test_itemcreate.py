@@ -5,7 +5,11 @@ from pydantic import BaseModel
 
 from router.usecase.api import itemcreate
 from model.domain import ItemFactory
-from model.service import ItemDictRepository, ItemDictIdentity
+from model.service import (
+    ItemDictRepository,
+    ItemDictIdentity,
+    JanCodeInfoDictRepository,
+)
 
 from router.param import ItemCreateParam
 
@@ -17,10 +21,12 @@ class TestItemCreate:
         self, icp: ItemCreateParam, error_msg: str, correct_item: ItemComparingData
     ):
         database: dict = {}
+        jancodeinfo_database: dict = {}
         ret = await itemcreate.ItemCreate(
             itemrepository=ItemDictRepository(data=database),
             itemfactory=ItemFactory(),
             itemidentity=ItemDictIdentity(data=database),
+            jancodeinforepository=JanCodeInfoDictRepository(data=jancodeinfo_database),
         ).create(itemcreateparam=icp)
 
         assert error_msg == ret.error_msg

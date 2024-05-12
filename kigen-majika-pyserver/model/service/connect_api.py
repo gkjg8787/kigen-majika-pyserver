@@ -1,8 +1,10 @@
+from datetime import datetime, timezone
+
 import httpx
 
 from model.service import IJanCodeInfoCreator
-from model.service.jancode_item import JanCodeInfo
-from router.usecase import ItemNameResult
+from model.domain import JanCodeInfo, JanCodeInfoFactory
+from router.usecase import JanCodeInfoResult
 
 
 class ConnectToAPIJanCodeInfoCreator(IJanCodeInfoCreator):
@@ -14,7 +16,13 @@ class ConnectToAPIJanCodeInfoCreator(IJanCodeInfoCreator):
     async def create(self, jan_code: str) -> JanCodeInfo:
         async with httpx.AsyncClient() as client:
             res = await client.get(self.url)
-            inr = ItemNameResult(**res.json())
-            if inr.name is None:
-                inr.name = ""
-            return JanCodeInfo(jan_code=jan_code, name=inr.name)
+            jancodeinforesult = JanCodeInfoResult(**res.json())
+            if jancodeinforesult.jancodeinfo:
+                return jancodeinforesult.jancodeinfo
+            return JanCodeInfoFactory.create(
+                jan_code=jan_code,
+                name="",
+                category="",
+                manufacturer="",
+                updated_at=datetime.now(timezone.utc),
+            )

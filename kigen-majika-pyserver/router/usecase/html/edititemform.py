@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import datetime, tzinfo
 import json
 
 import httpx
 
-from router.usecase.shared import htmlcontext, htmlname
+from router.usecase.shared import htmlcontext, htmlname, util as sutil
 from router.usecase.shared.readitemform import GetOneItemCommand, GetOneItemForm
 from router.usecase import ItemUpdateResult
 from router.param import EditItemGetForm, EditItemPostForm
@@ -40,10 +40,17 @@ class EditItemFormResult(htmlcontext.HtmlContext):
 class EditItemInitForm:
     edititemgetform: EditItemGetForm
     detail_api_url: str
+    local_timezone: tzinfo
 
-    def __init__(self, edititemgetform: EditItemGetForm, detail_api_url: str):
+    def __init__(
+        self,
+        edititemgetform: EditItemGetForm,
+        detail_api_url: str,
+        local_timezone: tzinfo,
+    ):
         self.edititemgetform = edititemgetform
         self.detail_api_url = detail_api_url
+        self.local_timezone = local_timezone
 
     async def execute(self) -> EditItemFormResult:
         getoneresult = await GetOneItemForm(
@@ -56,7 +63,15 @@ class EditItemInitForm:
             )
         result = EditItemFormResult(**getoneresult.item.model_dump())
         if result.expiry_date:
-            result.expiry_date = result.expiry_date.date()
+            result.expiry_date = sutil.utcTolocaltime(
+                result.expiry_date, tz=self.local_timezone
+            ).date()
+        result.created_at = sutil.utcTolocaltime(
+            input_date=result.created_at, tz=self.local_timezone
+        )
+        result.updated_at = sutil.utcTolocaltime(
+            input_date=result.updated_at, tz=self.local_timezone
+        )
         return result
 
 
@@ -64,16 +79,19 @@ class EditItemForm:
     edititempostform: EditItemPostForm
     detail_api_url: str
     update_api_url: str
+    local_timezone: tzinfo
 
     def __init__(
         self,
         edititempostform: EditItemPostForm,
         detail_api_url: str,
         update_api_url: str,
+        local_timezone: tzinfo,
     ):
         self.edititempostform = edititempostform
         self.detail_api_url = detail_api_url
         self.update_api_url = update_api_url
+        self.local_timezone = local_timezone
 
     async def execute(self) -> EditItemFormResult:
         async with httpx.AsyncClient() as client:
@@ -93,5 +111,13 @@ class EditItemForm:
             **itemupdateresult.item.model_dump(), is_next_page=True
         )
         if result.expiry_date:
-            result.expiry_date = result.expiry_date.date()
+            result.expiry_date = sutil.utcTolocaltime(
+                result.expiry_date, tz=self.local_timezone
+            ).date()
+        result.created_at = sutil.utcTolocaltime(
+            input_date=result.created_at, tz=self.local_timezone
+        )
+        result.updated_at = sutil.utcTolocaltime(
+            input_date=result.updated_at, tz=self.local_timezone
+        )
         return result

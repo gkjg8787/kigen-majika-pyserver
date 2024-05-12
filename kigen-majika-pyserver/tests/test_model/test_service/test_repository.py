@@ -2,17 +2,12 @@ from datetime import datetime, timezone
 import pytest
 
 from model.service import (
-    ItemNameRepository,
     ItemRepository,
-    ItemCategoryRepository,
-    ItemManufacturerRepository,
+    JanCodeInfoRepository,
 )
 from model.domain import (
-    ItemNameData,
-    ItemFactory,
     Item,
-    ItemCategoryData,
-    ItemManufacturerData,
+    JanCodeInfo,
 )
 from model.database import (
     ItemName,
@@ -22,36 +17,6 @@ from model.database import (
     ItemManufacturer,
 )
 from . import shared
-
-
-class TestItemNameRepository:
-    @pytest.mark.asyncio
-    async def test_save(self, test_db):
-        name = "test"
-        jan_code = "012345678912"
-        async for db in test_db:
-            repo = ItemNameRepository(db)
-            ind = ItemNameData(name=name, jan_code=jan_code)
-            await repo.save(ind)
-            ret: ItemName = await db.get(ItemName, jan_code)
-            assert ret
-            compitemname = ItemName(name=name, jan_code=jan_code)
-            assert ret.jan_code == compitemname.jan_code
-            assert ret.name == compitemname.name
-
-    @pytest.mark.asyncio
-    async def test_find_by_jan_code(self, test_db):
-        name = "test"
-        jan_code = "0123456789012"
-        async for db in test_db:
-            repo = ItemNameRepository(db)
-            itemname = ItemName(jan_code=jan_code, name=name)
-            db.add(itemname)
-            await db.commit()
-            ret = await repo.find_by_jan_code(jan_code=jan_code)
-            assert ret
-            assert ret.jan_code == itemname.jan_code
-            assert ret.name == itemname.name
 
 
 class TestItemRepository:
@@ -256,3 +221,104 @@ class TestItemRepository:
             assert len(rets) == 2
             for r in rets:
                 assert r.id != itemlist[target_index].id
+
+
+class TestJanCodeInfoRepository:
+    async def assert_comparing_jancodeinfo(self, db, jancodeinfo: JanCodeInfo):
+        iname: ItemName = await db.get(ItemName, jancodeinfo.jan_code)
+        icate: ItemCategory = await db.get(ItemCategory, jancodeinfo.jan_code)
+        imanu: ItemManufacturer = await db.get(ItemManufacturer, jancodeinfo.jan_code)
+        assert iname.jan_code == jancodeinfo.jan_code
+        assert iname.name == jancodeinfo.name
+
+        assert icate.jan_code == jancodeinfo.jan_code
+        assert icate.category == jancodeinfo.category
+
+        assert imanu.jan_code == jancodeinfo.jan_code
+        assert imanu.manufacturer == jancodeinfo.manufacturer
+
+    @pytest.mark.asyncio
+    async def test_save(self, test_db):
+        async for db in test_db:
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo()
+            await repo.save(jancodeinfo)
+            await self.assert_comparing_jancodeinfo(db=db, jancodeinfo=jancodeinfo)
+
+    @pytest.mark.asyncio
+    async def test_save_update_name(self, test_db):
+        async for db in test_db:
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo()
+            await repo.save(jancodeinfo)
+            jancodeinfo.name = "aaa"
+            await repo.save(jancodeinfo)
+            await self.assert_comparing_jancodeinfo(db=db, jancodeinfo=jancodeinfo)
+
+    @pytest.mark.asyncio
+    async def test_save_update_category(self, test_db):
+        async for db in test_db:
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo()
+            await repo.save(jancodeinfo)
+            jancodeinfo.category = "bbb"
+            await repo.save(jancodeinfo)
+            await self.assert_comparing_jancodeinfo(db=db, jancodeinfo=jancodeinfo)
+
+    @pytest.mark.asyncio
+    async def test_save_update_manufacturer(self, test_db):
+        async for db in test_db:
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo()
+            await repo.save(jancodeinfo)
+            jancodeinfo.manufacturer = "ccc"
+            await repo.save(jancodeinfo)
+            await self.assert_comparing_jancodeinfo(db=db, jancodeinfo=jancodeinfo)
+
+    @pytest.mark.asyncio
+    async def test_save_update_all(self, test_db):
+        async for db in test_db:
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo()
+            await repo.save(jancodeinfo)
+            jancodeinfo.name = "not test"
+            jancodeinfo.category = "not category"
+            jancodeinfo.manufacturer = "not manufacturer"
+            await repo.save(jancodeinfo)
+            await self.assert_comparing_jancodeinfo(db=db, jancodeinfo=jancodeinfo)
+
+    def assert_comparing_two_jancodeinfo(self, one: JanCodeInfo, two: JanCodeInfo):
+        assert one.jan_code == two.jan_code
+        assert one.name == two.name
+        assert one.category == two.category
+        assert one.manufacturer == two.manufacturer
+        assert one.updated_at == two.updated_at
+
+    @pytest.mark.asyncio
+    async def test_find_by_jan_code_get_data(self, test_db):
+        async for db in test_db:
+            repo = ItemRepository(db)
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo(
+                updated_at=datetime(2024, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
+            )
+            await repo.save(jancodeinfo)
+
+            ret = await repo.find_by_jan_code(jancodeinfo.jan_code)
+            assert ret is not None
+            self.assert_comparing_two_jancodeinfo(ret, jancodeinfo)
+
+    @pytest.mark.asyncio
+    async def test_find_by_jan_code_not_get_data(self, test_db):
+        jan_code = "0123456789012"
+        async for db in test_db:
+            repo = ItemRepository(db)
+            repo = JanCodeInfoRepository(db)
+            jancodeinfo: JanCodeInfo = shared.get_jancodeinfo(
+                jan_code=jancodeinfo,
+                updated_at=datetime(2024, 1, 1, 10, 0, 0, tzinfo=timezone.utc),
+            )
+            await repo.save(jancodeinfo)
+
+            ret = await repo.find_by_jan_code(jan_code="1111111111111")
+            assert ret is None

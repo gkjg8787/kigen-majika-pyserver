@@ -5,10 +5,9 @@ from sqlalchemy import select
 
 from model.domain import (
     Item,
-    ItemNameData,
     ItemFactory,
-    ItemCategoryData,
-    ItemManufacturerData,
+    JanCodeInfo,
+    JanCodeInfoFactory,
 )
 from model.database import (
     ItemInventory,
@@ -17,7 +16,7 @@ from model.database import (
     ItemMemo,
     ItemManufacturer,
 )
-from .dbconvert import ItemToDBObject, DBToItem
+from .dbconvert import ItemToDBObject, DBToItem, JanCodeInfoToDBObject, DBToJanCodeInfo
 from .dbdata_compare import (
     ItemInventoryDataCompare,
     ItemCategoryDataCompare,
@@ -49,33 +48,13 @@ class IItemRepository(metaclass=ABCMeta):
         pass
 
 
-class IItemNameRepository(metaclass=ABCMeta):
+class IJanCodeInfoRepository(metaclass=ABCMeta):
     @abstractmethod
-    async def save(self, itemnamedata: ItemNameData):
+    async def save(self, jancodeinfo: JanCodeInfo):
         pass
 
     @abstractmethod
-    async def find_by_jan_code(self, jan_code: str) -> ItemName | None:
-        pass
-
-
-class IItemCategoryRepository(metaclass=ABCMeta):
-    @abstractmethod
-    async def save(self, itemcategorydata: ItemCategoryData):
-        pass
-
-    @abstractmethod
-    async def find_by_jan_code(self, jan_code: str) -> ItemCategory | None:
-        pass
-
-
-class IItemManufacturerRepository(metaclass=ABCMeta):
-    @abstractmethod
-    async def save(self, itemmanufacturerdata: ItemManufacturerData):
-        pass
-
-    @abstractmethod
-    async def find_by_jan_code(self, jan_code: str) -> ItemManufacturer | None:
+    async def find_by_jan_code(self, jan_code: str) -> JanCodeInfo | None:
         pass
 
 
@@ -225,16 +204,16 @@ class ItemRepository(IItemRepository):
         await db.commit()
 
 
-class ItemNameRepository(IItemNameRepository):
+class JanCodeInfoRepository(IJanCodeInfoRepository):
     session: AsyncSession
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def save(self, itemnamedata: ItemNameData):
+    async def save(self, jancodeinfo: JanCodeInfo):
         db = self.session
-        iname: ItemName = await db.get(ItemName, itemnamedata.jan_code)
-        new_iname = ItemName(jan_code=itemnamedata.jan_code, name=itemnamedata.name)
+        iname: ItemName = await db.get(ItemName, jancodeinfo.jan_code)
+        new_iname = JanCodeInfoToDBObject.toItemName(jancodeinfo)
         if not iname:
             db.add(new_iname)
             await db.commit()
@@ -245,26 +224,8 @@ class ItemNameRepository(IItemNameRepository):
             await db.commit()
             await db.refresh(iname)
 
-    async def find_by_jan_code(self, jan_code: str) -> ItemName | None:
-        db = self.session
-        iname: ItemName = await db.get(ItemName, jan_code)
-        if not iname:
-            return None
-        return iname
-
-
-class ItemCategoryRepository(IItemCategoryRepository):
-    session: AsyncSession
-
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def save(self, itemcategorydata: ItemCategoryData):
-        db = self.session
-        icate: ItemCategory = await db.get(ItemCategory, itemcategorydata.jan_code)
-        new_icate = ItemCategory(
-            jan_code=itemcategorydata.jan_code, category=itemcategorydata.category
-        )
+        icate: ItemCategory = await db.get(ItemCategory, jancodeinfo.jan_code)
+        new_icate = JanCodeInfoToDBObject.toItemCategory(jancodeinfo)
         if not icate:
             db.add(new_icate)
             await db.commit()
@@ -275,29 +236,8 @@ class ItemCategoryRepository(IItemCategoryRepository):
             await db.commit()
             await db.refresh(icate)
 
-    async def find_by_jan_code(self, jan_code: str) -> ItemCategory | None:
-        db = self.session
-        icate: ItemCategory = await db.get(ItemCategory, jan_code)
-        if not icate:
-            return None
-        return icate
-
-
-class ItemManufacturerRepository(IItemManufacturerRepository):
-    session: AsyncSession
-
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def save(self, itemmanufacturerdata: ItemManufacturerData):
-        db = self.session
-        imanu: ItemManufacturer = await db.get(
-            ItemManufacturer, itemmanufacturerdata.jan_code
-        )
-        new_imanu = ItemManufacturer(
-            jan_code=itemmanufacturerdata.jan_code,
-            manufacturer=itemmanufacturerdata.manufacturer,
-        )
+        imanu: ItemManufacturer = await db.get(ItemManufacturer, jancodeinfo.jan_code)
+        new_imanu = JanCodeInfoToDBObject.toItemManufacturer(jancodeinfo)
         if not imanu:
             db.add(new_imanu)
             await db.commit()
@@ -308,18 +248,31 @@ class ItemManufacturerRepository(IItemManufacturerRepository):
             await db.commit()
             await db.refresh(imanu)
 
-    async def find_by_jan_code(self, jan_code: str) -> ItemManufacturer | None:
+    async def find_by_jan_code(self, jan_code: str) -> JanCodeInfo | None:
         db = self.session
-        imanu: ItemManufacturer = await db.get(ItemManufacturer, jan_code)
-        if not imanu:
+        stmt = (
+            select(ItemName, ItemCategory, ItemManufacturer)
+            .select_from(ItemName)
+            .join(ItemCategory, ItemName.jan_code == ItemCategory.jan_code)
+            .join(ItemManufacturer, ItemName.jan_code == ItemManufacturer.jan_code)
+            .where(ItemName.jan_code == jan_code)
+        )
+        ret = await db.execute(stmt)
+        one = ret.mappings().one_or_none()
+        if not one:
             return None
-        return imanu
+        jancodeinfo = DBToJanCodeInfo(JanCodeInfoFactory()).toJanCodeInfo(
+            item_name=one[ItemName.__name__],
+            item_category=one[ItemCategory.__name__],
+            item_manufacturer=one[ItemManufacturer.__name__],
+        )
+        return jancodeinfo
 
 
 class ItemDictRepository(IItemRepository):
     database: dict[int, Item]
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[int, Item]):
         self.database = data
 
     async def save(self, item: Item):
@@ -345,47 +298,14 @@ class ItemDictRepository(IItemRepository):
         return
 
 
-class ItemNameDictRepository(IItemNameRepository):
-    database: dict[str, ItemName]
+class JanCodeInfoDictRepository(IJanCodeInfoRepository):
+    database: dict[str, JanCodeInfo]
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, JanCodeInfo]):
         self.database = data
 
-    async def save(self, itemnamedata: ItemNameData):
-        self.database[itemnamedata.jan_code] = ItemName(
-            jan_code=itemnamedata.jan_code, name=itemnamedata.name
-        )
+    async def save(self, jancodeinfo: JanCodeInfo):
+        self.database[jancodeinfo.jan_code] = jancodeinfo
 
-    async def find_by_jan_code(self, jan_code: str) -> ItemName | None:
-        return self.database.get(jan_code, None)
-
-
-class ItemCategoryDictRepository(IItemCategoryRepository):
-    database: dict[str, ItemCategory]
-
-    def __init__(self, data: dict):
-        self.database = data
-
-    async def save(self, itemcategorydata: ItemCategoryData):
-        self.database[itemcategorydata.jan_code] = ItemCategory(
-            jan_code=itemcategorydata.jan_code, category=itemcategorydata.category
-        )
-
-    async def find_by_jan_code(self, jan_code: str) -> ItemCategory | None:
-        return self.database.get(jan_code, None)
-
-
-class ItemManufacturerDictRepository(IItemManufacturerRepository):
-    database: dict[str, ItemManufacturer]
-
-    def __init__(self, data: dict):
-        self.database = data
-
-    async def save(self, itemmanufacturerdata: ItemManufacturerData):
-        self.database[itemmanufacturerdata.jan_code] = ItemManufacturer(
-            jan_code=itemmanufacturerdata.jan_code,
-            manufacturer=itemmanufacturerdata.manufacturer,
-        )
-
-    async def find_by_jan_code(self, jan_code: str) -> ItemManufacturer | None:
+    async def find_by_jan_code(self, jan_code: str) -> JanCodeInfo | None:
         return self.database.get(jan_code, None)

@@ -5,7 +5,7 @@ from model.database import (
     ItemName,
     ItemManufacturer,
 )
-from model.domain import IItemFactory, Item
+from model.domain import IItemFactory, Item, JanCodeInfo, IJanCodeInfoFactory
 
 
 class ItemToDBObject:
@@ -46,6 +46,32 @@ class ItemToDBObject:
         )
 
 
+class JanCodeInfoToDBObject:
+    @classmethod
+    def toItemName(cls, jancodeinfo: JanCodeInfo) -> ItemName:
+        return ItemName(
+            jan_code=jancodeinfo.jan_code,
+            name=jancodeinfo.name,
+            updated_at=jancodeinfo.updated_at,
+        )
+
+    @classmethod
+    def toItemCategory(cls, jancodeinfo: JanCodeInfo) -> ItemCategory:
+        return ItemCategory(
+            jan_code=jancodeinfo.jan_code,
+            category=jancodeinfo.category,
+            updated_at=jancodeinfo.updated_at,
+        )
+
+    @classmethod
+    def toItemManufacturer(cls, jancodeinfo: JanCodeInfo) -> ItemManufacturer:
+        return ItemManufacturer(
+            jan_code=jancodeinfo.jan_code,
+            manufacturer=jancodeinfo.manufacturer,
+            updated_at=jancodeinfo.updated_at,
+        )
+
+
 class DBToItem:
     factory: IItemFactory
 
@@ -72,4 +98,32 @@ class DBToItem:
             expiry_date=item_inventory.expiry_date,
             created_at=item_inventory.created_at,
             updated_at=item_inventory.updated_at,
+        )
+
+
+class DBToJanCodeInfo:
+    jancodeinfofactory: IJanCodeInfoFactory
+
+    def __init__(self, factory: IJanCodeInfoFactory):
+        self.jancodeinfofactory = factory
+
+    def toJanCodeInfo(
+        self,
+        item_name: ItemName,
+        item_category: ItemCategory,
+        item_manufacturer: ItemManufacturer,
+    ) -> JanCodeInfo:
+        updl: list = []
+        if item_name.updated_at:
+            updl.append(item_name.updated_at)
+        if item_category.updated_at:
+            updl.append(item_category.updated_at)
+        if item_manufacturer.updated_at:
+            updl.append(item_manufacturer.updated_at)
+        return self.jancodeinfofactory.create(
+            jan_code=item_name.jan_code,
+            name=item_name.name,
+            category=item_category.category,
+            manufacturer=item_manufacturer.manufacturer,
+            updated_at=max(updl),
         )

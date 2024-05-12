@@ -4,8 +4,7 @@ import httpx
 from datetime import tzinfo
 
 from model.domain import Item, ItemSort, ItemStockFilter
-from router.usecase.shared import htmlcontext, util as sutil
-from router.usecase.shared import htmlname, htmlform
+from router.usecase.shared import htmlcontext, htmlname, htmlform, util as sutil
 from router.param import ItemListGetForm
 
 

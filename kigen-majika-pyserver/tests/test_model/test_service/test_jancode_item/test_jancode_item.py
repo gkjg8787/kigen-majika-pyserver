@@ -1,9 +1,17 @@
 import os
-
+from datetime import datetime, timezone
 import pytest
 
-from model.service.jancode_item import JanSyohinKensakuResult, JanCodeInfo
+from model.service.jancode_item import JanSyohinKensakuResult, JanCodeInfoData
 from model.service import OnlineJanCodeInfoCreator
+from model.domain import JanCodeInfo, JanCodeInfoFactory
+
+
+def assert_comparing_jancodeinfo(one: JanCodeInfo, two: JanCodeInfo):
+    assert one.jan_code == two.jan_code
+    assert one.name == two.name
+    assert one.category == two.category
+    assert one.manufacturer == two.manufacturer
 
 
 class TestJanSyohinKensakuResult:
@@ -17,14 +25,19 @@ class TestJanSyohinKensakuResult:
             html = f.read()
         assert html != ""
         jan_code = "4902121033850"
-        parse_jancodeinfo = JanSyohinKensakuResult(html).toJanCodeInfo(jan_code)
+        parse_jancodeinfo = JanSyohinKensakuResult(html).toJanCodeInfo(
+            jancodeinfodata=JanCodeInfoData(
+                jancodeinfofactory=JanCodeInfoFactory(), jan_code=jan_code
+            )
+        )
         compjci = JanCodeInfo(
             jan_code=jan_code,
             name="TVBP 穀物酢",
             category="加工食品 調味料",
             manufacturer="イオン",
+            updated_at=datetime.now(timezone.utc),
         )
-        assert parse_jancodeinfo == compjci
+        assert_comparing_jancodeinfo(parse_jancodeinfo, compjci)
 
     def test_toJanCodeInfo_no_data(self):
         html = ""
@@ -32,14 +45,19 @@ class TestJanSyohinKensakuResult:
             html = f.read()
         assert html != ""
         jan_code = "4"
-        parse_jancodeinfo = JanSyohinKensakuResult(html).toJanCodeInfo(jan_code)
+        parse_jancodeinfo = JanSyohinKensakuResult(html).toJanCodeInfo(
+            jancodeinfodata=JanCodeInfoData(
+                jancodeinfofactory=JanCodeInfoFactory(), jan_code=jan_code
+            )
+        )
         compjci = JanCodeInfo(
             jan_code=jan_code,
             name="",
             category="",
             manufacturer="",
+            updated_at=datetime.now(timezone.utc),
         )
-        assert parse_jancodeinfo == compjci
+        assert_comparing_jancodeinfo(parse_jancodeinfo, compjci)
 
 
 class TestOnlineJanCodeInfoCreator:
@@ -47,11 +65,14 @@ class TestOnlineJanCodeInfoCreator:
     @pytest.mark.asyncio
     async def test_create(self, test_db):
         jan_code = "4902121033850"
-        get_jancodeinfo = await OnlineJanCodeInfoCreator().create(jan_code)
+        get_jancodeinfo = await OnlineJanCodeInfoCreator(
+            factory=JanCodeInfoFactory()
+        ).create(jan_code)
         compjci = JanCodeInfo(
             jan_code=jan_code,
             name="TVBP 穀物酢",
             category="加工食品 調味料",
             manufacturer="イオン",
+            updated_at=datetime.now(timezone.utc),
         )
-        assert get_jancodeinfo == compjci
+        assert_comparing_jancodeinfo(get_jancodeinfo, compjci)

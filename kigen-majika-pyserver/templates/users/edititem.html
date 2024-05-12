@@ -22,8 +22,8 @@
         <p>備考： <input type="text" name="{{ POST_TEXT }}" value="{{ text }}"></p>
         <p>消費期限： <input type="date" name="{{ POST_EXPIRY_DATE }}" value="{{ expiry_date }}"></p>
         <input type="hidden" name="{{POST_TIMEZONE}}" value="{{ local_timezone }}">
-        <p>登録日： {{ created_at }}</p>
-        <p>更新日： {{ updated_at }}</p>
+        <p>登録日： {{ created_at | toLocalTextFormat }}</p>
+        <p>更新日： {{ updated_at | toLocalTextFormat }}</p>
         {%- if error_msg %}
         <p style="color:red;">{{ error_msg }}</p>
         {%- endif %}

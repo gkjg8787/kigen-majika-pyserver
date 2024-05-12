@@ -62,10 +62,10 @@
             <td>{{row["category"]}}</td>
             <td>{{row["manufacturer"]}}</td>
             <td>{{row["place"]}}</td>
-            <td>{{row["expiry_date"]}}</td>
+            <td>{{row["expiry_date"] | toLocalExpiryDateTextFormat }}</td>
             <td>{{row["text"]}}</td>
-            <td>{{row["updated_at"]}}</td>
-            <td>{{row["created_at"]}}</td>
+            <td>{{row["updated_at"] | toLocalTextFormat }}</td>
+            <td>{{row["created_at"] | toLocalTextFormat }}</td>
             <td class="noborder nobreak">
                 <a href="{{ url_for('read_users_items_edit') }}?{{ PARAM_ID }}={{ row['id'] }}" class="like_button_link">編集</a>
             </td>

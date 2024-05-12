@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from model.domain import Item, ItemFactory
+from model.domain import Item, ItemFactory, JanCodeInfo, JanCodeInfoFactory
 
 
 def get_item(
@@ -32,5 +32,23 @@ def get_item(
         text=text,
         expiry_date=expiry_date,
         created_at=created_at,
+        updated_at=updated_at,
+    )
+
+
+def get_jancodeinfo(
+    jan_code: str = "0123456789012",
+    name: str = "test",
+    category: str = "category",
+    manufacturer: str = "manufacturer",
+    updated_at: datetime | None = None,
+) -> JanCodeInfo:
+    if not updated_at:
+        updated_at = datetime.now(timezone.utc)
+    return JanCodeInfoFactory.create(
+        jan_code=jan_code,
+        name=name,
+        category=category,
+        manufacturer=manufacturer,
         updated_at=updated_at,
     )

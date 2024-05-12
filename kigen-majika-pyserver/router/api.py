@@ -5,14 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from model.database import get_async_session
 from router.usecase import (
-    OnlineItemName,
+    GetOnlineJanCodeInfo,
     ItemList,
     ItemOne,
     ItemCreate,
     ItemUpdate,
     ItemDelete,
     ItemListResult,
-    ItemNameResult,
+    JanCodeInfoResult,
     ItemCreateResult,
     ItemUpdateResult,
     ItemDeleteResult,
@@ -27,11 +27,11 @@ from router.param import (
 from model.service import (
     ItemRepository,
     ItemQueryService,
-    ItemNameRepository,
+    JanCodeInfoRepository,
     OnlineJanCodeInfoCreator,
     ItemIdentity,
 )
-from model.domain import ItemFactory
+from model.domain import ItemFactory, JanCodeInfoFactory
 import settings
 
 router = APIRouter(prefix="/api", tags=["api"])
@@ -59,15 +59,15 @@ async def read_api_item_detail(
     return results
 
 
-@router.get("/items/{jan_code}/name", response_model=ItemNameResult)
-async def read_api_itemname(
+@router.get("/items/{jan_code}/info", response_model=JanCodeInfoResult)
+async def read_api_item_jancodeinfo(
     request: Request,
     jan_code: str,
     db: AsyncSession = Depends(get_async_session),
 ):
-    results = await OnlineItemName(
-        repository=ItemNameRepository(db),
-        jancodeinfocreator=OnlineJanCodeInfoCreator(),
+    results = await GetOnlineJanCodeInfo(
+        repository=JanCodeInfoRepository(db),
+        jancodeinfocreator=OnlineJanCodeInfoCreator(factory=JanCodeInfoFactory()),
         get_info_online=settings.GET_INFO_ONLINE,
     ).get_or_create(jan_code=jan_code)
     return results
@@ -83,6 +83,7 @@ async def read_api_item_create(
         itemrepository=ItemRepository(db),
         itemidentity=ItemIdentity(db),
         itemfactory=ItemFactory(),
+        jancodeinforepository=JanCodeInfoRepository(db),
     ).create(itemcreateparam)
     return itemcreateresult
 

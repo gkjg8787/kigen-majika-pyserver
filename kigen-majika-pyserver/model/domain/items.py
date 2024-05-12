@@ -19,6 +19,14 @@ class ItemManufacturerData(BaseModel):
     manufacturer: str
 
 
+class JanCodeInfo(BaseModel):
+    jan_code: str
+    name: str
+    category: str
+    manufacturer: str
+    updated_at: datetime
+
+
 class Item(BaseModel):
     id: int
     name: str = ""
@@ -64,6 +72,20 @@ class IItemFactory(metaclass=ABCMeta):
         pass
 
 
+class IJanCodeInfoFactory(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def create(
+        cls,
+        jan_code: str,
+        name: str,
+        category: str,
+        manufacturer: str,
+        updated_at: datetime,
+    ) -> JanCodeInfo:
+        pass
+
+
 class ItemFactory(IItemFactory):
     @classmethod
     def create(
@@ -103,6 +125,25 @@ class ItemFactory(IItemFactory):
             text=text,
             expiry_date=expiry_date,
             created_at=created_at,
+            updated_at=updated_at,
+        )
+
+
+class JanCodeInfoFactory(IJanCodeInfoFactory):
+    @classmethod
+    def create(
+        cls,
+        jan_code: str,
+        name: str,
+        category: str,
+        manufacturer: str,
+        updated_at: datetime,
+    ) -> JanCodeInfo:
+        return JanCodeInfo(
+            jan_code=jan_code,
+            name=name,
+            category=category,
+            manufacturer=manufacturer,
             updated_at=updated_at,
         )
 

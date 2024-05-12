@@ -1,5 +1,6 @@
 from .items import (
     Item,
+    JanCodeInfo,
     ItemNameData,
     IItemFactory,
     ItemFactory,
@@ -7,6 +8,8 @@ from .items import (
     ItemManufacturerData,
     ItemSort,
     ItemStockFilter,
+    IJanCodeInfoFactory,
+    JanCodeInfoFactory,
 )
 
 __all__ = [
@@ -14,11 +17,14 @@ __all__ = [
     "Item",
     "ItemNameData",
     "ItemCategoryData",
-    "ItemManufacturerData"
+    "ItemManufacturerData",
+    "JanCodeInfo",
     # interface
     "IItemFactory",
+    "IJanCodeInfoFactory",
     # factory
     "ItemFactory",
+    "JanCodeInfoFactory",
     # Enum
     "ItemSort",
     "ItemStockFilter",

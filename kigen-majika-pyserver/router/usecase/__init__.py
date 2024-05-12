@@ -1,7 +1,7 @@
 from .api import (
-    ItemName,
-    OnlineItemName,
-    ItemNameResult,
+    GetJanCodeInfo,
+    GetOnlineJanCodeInfo,
+    JanCodeInfoResult,
     ItemOne,
     ItemList,
     ItemListResult,
@@ -26,9 +26,9 @@ from .html import (
 )
 
 __all__ = [
-    "ItemName",
-    "OnlineItemName",
-    "ItemNameResult",
+    "GetJanCodeInfo",
+    "GetOnlineJanCodeInfo",
+    "JanCodeInfoResult",
     "ItemOne",
     "ItemList",
     "ItemListResult",

@@ -2,13 +2,9 @@ from .repository import (
     IItemRepository,
     ItemRepository,
     ItemDictRepository,
-    IItemNameRepository,
-    ItemNameRepository,
-    ItemNameDictRepository,
-    ItemCategoryRepository,
-    ItemCategoryDictRepository,
-    ItemManufacturerRepository,
-    ItemManufacturerDictRepository,
+    IJanCodeInfoRepository,
+    JanCodeInfoRepository,
+    JanCodeInfoDictRepository,
 )
 from .nextIdentity import IItemIdentity, ItemIdentity, ItemDictIdentity
 from .jancode_item import IJanCodeInfoCreator, OnlineJanCodeInfoCreator
@@ -23,10 +19,10 @@ from .itemqueryservice import (
 __all__ = [
     # interface
     "IItemRepository",
-    "IItemNameRepository",
     "IItemIdentity",
     "IJanCodeInfoCreator",
     "IItemQueryService",
+    "IJanCodeInfoRepository",
     # service
     "ItemIdentity",
     "ItemDictIdentity",
@@ -36,12 +32,8 @@ __all__ = [
     # repository
     "ItemRepository",
     "ItemDictRepository",
-    "ItemNameRepository",
-    "ItemNameDictRepository",
-    "ItemCategoryRepository",
-    "ItemCategoryDictRepository",
-    "ItemManufacturerRepository",
-    "ItemManufacturerDictRepository",
+    "JanCodeInfoRepository",
+    "JanCodeInfoDictRepository",
     # command
     "ItemQueryCommand",
     # result

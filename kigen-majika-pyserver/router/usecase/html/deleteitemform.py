@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import datetime, tzinfo
 import json
 
 import httpx
 
-from router.usecase.shared import htmlcontext, htmlname
+from router.usecase.shared import htmlcontext, htmlname, util as sutil
 from router.usecase.shared.readitemform import (
     GetOneItemForm,
     GetOneItemCommand,
@@ -14,6 +14,7 @@ from router.param import DeleteItemPostForm
 
 class DeleteItemFormResult(htmlcontext.HtmlContext):
     POST_ID: str = htmlname.POSTNAME.ID.value
+    PARAM_ID: str = htmlname.POSTNAME.ID.value
 
     is_next_page: bool = False
     error_msg: str = ""
@@ -33,10 +34,17 @@ class DeleteItemFormResult(htmlcontext.HtmlContext):
 class DeleteItemInitForm:
     deleteitempostform: DeleteItemPostForm
     detail_api_url: str
+    local_timezone: tzinfo
 
-    def __init__(self, deleteitempostform: DeleteItemPostForm, detail_api_url: str):
+    def __init__(
+        self,
+        deleteitempostform: DeleteItemPostForm,
+        detail_api_url: str,
+        local_timezone: tzinfo,
+    ):
         self.deleteitempostform = deleteitempostform
         self.detail_api_url = detail_api_url
+        self.local_timezone = local_timezone
 
     async def execute(self) -> DeleteItemFormResult:
         getoneresult = await GetOneItemForm(
@@ -49,17 +57,32 @@ class DeleteItemInitForm:
             )
         result = DeleteItemFormResult(**getoneresult.item.model_dump())
         if result.expiry_date:
-            result.expiry_date = result.expiry_date.date()
+            result.expiry_date = sutil.utcTolocaltime(
+                result.expiry_date, tz=self.local_timezone
+            ).date()
+        result.created_at = sutil.utcTolocaltime(
+            input_date=result.created_at, tz=self.local_timezone
+        )
+        result.updated_at = sutil.utcTolocaltime(
+            input_date=result.updated_at, tz=self.local_timezone
+        )
         return result
 
 
 class DeleteItemForm:
     deleteitempostform: DeleteItemPostForm
     delete_api_url: str
+    local_timezone: tzinfo
 
-    def __init__(self, deleteitempostform: DeleteItemPostForm, delete_api_url: str):
+    def __init__(
+        self,
+        deleteitempostform: DeleteItemPostForm,
+        delete_api_url: str,
+        local_timezone: tzinfo,
+    ):
         self.deleteitempostform = deleteitempostform
         self.delete_api_url = delete_api_url
+        self.local_timezone = local_timezone
 
     async def execute(self) -> DeleteItemFormResult:
         async with httpx.AsyncClient() as client:
@@ -79,5 +102,13 @@ class DeleteItemForm:
             is_next_page=True
         )
         if result.expiry_date:
-            result.expiry_date = result.expiry_date.date()
+            result.expiry_date = sutil.utcTolocaltime(
+                result.expiry_date, tz=self.local_timezone
+            ).date()
+        result.created_at = sutil.utcTolocaltime(
+            input_date=result.created_at, tz=self.local_timezone
+        )
+        result.updated_at = sutil.utcTolocaltime(
+            input_date=result.updated_at, tz=self.local_timezone
+        )
         return result

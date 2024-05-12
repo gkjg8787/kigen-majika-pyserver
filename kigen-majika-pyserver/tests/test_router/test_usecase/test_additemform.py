@@ -5,9 +5,8 @@ import pytest
 
 from router.usecase import AddItemForm, ItemCreateResult, AddItemFormResult
 from router.param import AddItemPostForm
-from model.domain import ItemFactory, Item
+from model.domain import ItemFactory, Item, JanCodeInfo, JanCodeInfoFactory
 from model.service import IJanCodeInfoCreator
-from model.service.jancode_item import JanCodeInfo
 from router.usecase.shared import htmlname
 
 
@@ -23,12 +22,33 @@ class DummyRequestResult:
 
 class DummyJanCodeInfoCreator(IJanCodeInfoCreator):
     name: str
+    category: str
+    manufacturer: str
+    updated_at: datetime
 
-    def __init__(self, name: str):
+    def __init__(
+        self,
+        name: str = "",
+        category: str = "",
+        manufacturer: str = "",
+        updated_at: datetime | None = None,
+    ):
         self.name = name
+        self.category = category
+        self.manufacturer = manufacturer
+        if not updated_at:
+            self.updated_at = datetime.now(timezone.utc)
+        else:
+            self.updated_at = updated_at
 
     async def create(self, jan_code: str) -> JanCodeInfo:
-        return JanCodeInfo(jan_code=jan_code, name=self.name)
+        return JanCodeInfoFactory.create(
+            jan_code=jan_code,
+            name=self.name,
+            category=self.category,
+            manufacturer=self.manufacturer,
+            updated_at=self.updated_at,
+        )
 
 
 class TestAddItemForm:

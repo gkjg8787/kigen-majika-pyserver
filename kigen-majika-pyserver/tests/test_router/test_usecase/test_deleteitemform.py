@@ -12,7 +12,7 @@ from router.usecase import (
 )
 from router.param import DeleteItemPostForm
 from model.domain import ItemFactory
-from router.usecase.shared import htmlname
+from router.usecase.shared import util as sutil
 
 
 class DummyRequestResult:
@@ -67,7 +67,9 @@ class TestDeleteItemInitForm:
             ),
         )
         result = await DeleteItemInitForm(
-            deleteitempostform=deleteitempostform, detail_api_url="dummy"
+            deleteitempostform=deleteitempostform,
+            detail_api_url="dummy",
+            local_timezone=sutil.JST,
         ).execute()
         comparing_data = DeleteItemFormResult(**item.model_dump())
         assert result == comparing_data
@@ -86,7 +88,9 @@ class TestDeleteItemForm:
             ),
         )
         result = await DeleteItemForm(
-            deleteitempostform=deleteitempostform, delete_api_url="dummy"
+            deleteitempostform=deleteitempostform,
+            delete_api_url="dummy",
+            local_timezone=sutil.JST,
         ).execute()
         comparing_data = DeleteItemFormResult(
             **deleteitempostform.model_dump(), is_next_page=True

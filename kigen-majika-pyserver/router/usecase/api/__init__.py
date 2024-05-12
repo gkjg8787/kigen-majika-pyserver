@@ -1,13 +1,13 @@
-from .itemsname import ItemName, OnlineItemName, ItemNameResult
 from .itemlist import ItemList, ItemListResult, ItemOne
 from .itemcreate import ItemCreate, ItemCreateResult
 from .itemupdate import ItemUpdate, ItemUpdateResult
 from .itemdelete import ItemDelete, ItemDeleteResult
+from .item_jancodeinfo import GetOnlineJanCodeInfo, GetJanCodeInfo, JanCodeInfoResult
 
 __all__ = [
-    "ItemName",
-    "OnlineItemName",
-    "ItemNameResult",
+    "GetOnlineJanCodeInfo",
+    "GetJanCodeInfo",
+    "JanCodeInfoResult",
     "ItemList",
     "ItemOne",
     "ItemListResult",

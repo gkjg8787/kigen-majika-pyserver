@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from main import app
-from model.domain import ItemFactory
+from model.domain import ItemFactory, JanCodeInfoFactory
 from router.param import (
     ItemCreateParam,
     ItemUpdateParam,
@@ -16,7 +16,7 @@ from router.param import (
 )
 from router.usecase import (
     ItemListResult,
-    ItemNameResult,
+    JanCodeInfoResult,
     ItemCreateResult,
     ItemUpdateResult,
     ItemDeleteResult,
@@ -115,29 +115,40 @@ async def test_read_api_item_detail_exist_data(test_db, mocker):
 
 
 @pytest.mark.asyncio
-async def test_read_api_itemname_get_name(test_db, mocker):
-    jan_code = "0123456789012"
+async def test_read_api_item_jancodeinfo_get_data(test_db, mocker):
+    jan_code = "012456789012"
     name = "test"
-    m = mocker.patch(
-        "router.usecase.OnlineItemName.get_or_create",
-        return_value=ItemNameResult(jan_code=jan_code, name=name),
+    category = "category"
+    manufacturer = "maker"
+    updated_at = datetime.now(timezone.utc)
+    jancodeinfo = JanCodeInfoFactory.create(
+        jan_code=jan_code,
+        name=name,
+        category=category,
+        manufacturer=manufacturer,
+        updated_at=updated_at,
     )
-    response = client.get(f"{prefix}/items/{jan_code}/name/")
+    m = mocker.patch(
+        "router.usecase.GetOnlineJanCodeInfo.get_or_create",
+        return_value=JanCodeInfoResult(jancodeinfo=jancodeinfo),
+    )
+    response = client.get(f"{prefix}/items/{jan_code}/info/")
     assert response.status_code == 200
-    assert response.json() == ItemNameResult(jan_code=jan_code, name=name).model_dump()
+    assert response.json() == json.loads(
+        JanCodeInfoResult(jancodeinfo=jancodeinfo).model_dump_json()
+    )
 
 
 @pytest.mark.asyncio
-async def test_read_api_itemname_get_none(test_db, mocker):
-    jan_code = "0123456789012"
-    name = None
+async def test_read_api_item_jancodeinfo_not_get_data(test_db, mocker):
+    jan_code = "012456789012"
     m = mocker.patch(
-        "router.usecase.OnlineItemName.get_or_create",
-        return_value=ItemNameResult(jan_code=jan_code, name=name),
+        "router.usecase.GetOnlineJanCodeInfo.get_or_create",
+        return_value=JanCodeInfoResult(),
     )
-    response = client.get(f"{prefix}/items/{jan_code}/name/")
+    response = client.get(f"{prefix}/items/{jan_code}/info/")
     assert response.status_code == 200
-    assert response.json() == ItemNameResult(jan_code=jan_code, name=name).model_dump()
+    assert response.json() == json.loads(JanCodeInfoResult().model_dump_json())
 
 
 @pytest.mark.asyncio

@@ -7,12 +7,11 @@ from router.usecase import (
     EditItemForm,
     EditItemInitForm,
     EditItemFormResult,
-    ItemListResult,
     ItemUpdateResult,
 )
 from router.param import EditItemGetForm, EditItemPostForm
 from model.domain import ItemFactory
-from router.usecase.shared import htmlname, readitemform
+from router.usecase.shared import htmlname, readitemform, util as sutil
 
 
 class DummyRequestResult:
@@ -64,7 +63,9 @@ class TestEditItemInitForm:
             return_value=readitemform.GetOneItemResult(item=item),
         )
         result = await EditItemInitForm(
-            edititemgetform=edititemgetform, detail_api_url="dummy"
+            edititemgetform=edititemgetform,
+            detail_api_url="dummy",
+            local_timezone=sutil.JST,
         ).execute()
         comparing_data = EditItemFormResult(**item.model_dump())
         assert result == comparing_data
@@ -79,7 +80,9 @@ class TestEditItemInitForm:
             return_value=readitemform.GetOneItemResult(error_msg=error_msg),
         )
         result = await EditItemInitForm(
-            edititemgetform=edititemgetform, detail_api_url="dummy"
+            edititemgetform=edititemgetform,
+            detail_api_url="dummy",
+            local_timezone=sutil.JST,
         ).execute()
         comparing_data = EditItemFormResult(id=target_id, error_msg=error_msg)
         assert result == comparing_data
@@ -133,6 +136,7 @@ class TestEditItemForm:
             edititempostform=edititempostform,
             update_api_url="dummy",
             detail_api_url="dummy",
+            local_timezone=sutil.JST,
         ).execute()
         comparing_data = EditItemFormResult(
             id=target_id, is_next_page=True, error_msg="No Update"
@@ -155,6 +159,7 @@ class TestEditItemForm:
             edititempostform=edititempostform,
             update_api_url="dummy",
             detail_api_url="dummy",
+            local_timezone=sutil.JST,
         ).execute()
         comparing_data = EditItemFormResult(
             is_next_page=True, **itemupdateresult.item.model_dump()

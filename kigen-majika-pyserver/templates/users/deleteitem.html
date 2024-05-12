@@ -22,9 +22,9 @@
         <p>カテゴリー：{{ category }}</p>
         <p>メーカー：{{ manufacturer }}</p>
         <p>備考：{{ text }}</p>
-        <p>消費期限：{{ expiry_date }}</p>
-        <p>登録日： {{ created_at }}</p>
-        <p>更新日： {{ updated_at }}</p>
+        <p>消費期限：{{ expiry_date | toLocalExpiryDateTextFormat }}</p>
+        <p>登録日： {{ created_at | toLocalTextFormat }}</p>
+        <p>更新日： {{ updated_at | toLocalTextFormat }}</p>
         <p style="color:red;">{{ errmsg }}</p>
         <p>本当に{{ name }}を削除しますか？</p>
         <p><input type="submit" value="削除する"></p>
