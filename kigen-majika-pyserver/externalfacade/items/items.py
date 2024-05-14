@@ -37,6 +37,7 @@ class ItemInventory(Base):
             f"id={self.id!r}"
             f", inventory={self.inventory!r}"
             f", place={self.place!r}"
+            f", expiry_date={self.expiry_date!r}"
             f", created_at={self.created_at!r}"
             f", updated_at={self.updated_at!r}"
             ")"
