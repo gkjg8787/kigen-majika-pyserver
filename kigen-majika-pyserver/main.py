@@ -2,7 +2,8 @@ from fastapi import FastAPI, status, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 
-from router import api, items
+from router.api import api
+from router.html import items
 
 app = FastAPI()
 

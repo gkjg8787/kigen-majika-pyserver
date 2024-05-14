@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import (
 
 from main import app
 from tests.db_settings import DATABASES
-from model.database.items import Base
-from model.database import get_async_session
+from externalfacade.items.items import Base
+from externalfacade import get_async_session
 
 
 @pytest.fixture(scope="session")

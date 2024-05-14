@@ -2,7 +2,7 @@ from enum import Enum
 import sys
 import argparse
 
-from model.database import db_util
+from externalfacade import db_util
 
 
 class DBCommandName(Enum):

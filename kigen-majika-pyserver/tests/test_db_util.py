@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from tests.db_settings import DATABASES
-from model.database.items import Base
+from externalfacade.items.items import Base
 
 parent_dir = dirname(dirname(__file__))
 sys.path.append(parent_dir)
