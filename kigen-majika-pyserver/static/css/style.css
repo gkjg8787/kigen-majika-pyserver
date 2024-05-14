@@ -47,8 +47,14 @@ td.noborder {
 .url_input {
     width: 60%;
 }
-.red_price {
+.red_text {
     color: #ff4500;
+}
+.purple_text {
+    color:#800080;
+}
+.sandybrown_text{
+    color:#f4a460;
 }
 .gray_background {
     background: #a9a9a9;

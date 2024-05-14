@@ -49,6 +49,7 @@
             <th>メーカー</th>
             <th>保管場所</th>
             <th>消費期限</th>
+            <th>注意度</th>
             <th>備考</th>
             <th>更新日</th>
             <th>登録日</th>
@@ -63,6 +64,17 @@
             <td>{{row["manufacturer"]}}</td>
             <td>{{row["place"]}}</td>
             <td>{{row["expiry_date"] | toLocalExpiryDateTextFormat }}</td>
+            <td>
+                {%- if row["days_to_deadline"] | is_expired %}
+                <span class="purple_text">危険</span>
+                {%- elif row["days_to_deadline"] | is_caution %}
+                <span class="red_text">注意</span>
+                {%- elif row["days_to_deadline"] | is_somewhat_caution %}
+                <span class="sandybrown_text">やや注意</span>
+                {%- else %}
+                <span>ー</span>
+                {%- endif %}
+            </td>
             <td>{{row["text"]}}</td>
             <td>{{row["updated_at"] | toLocalTextFormat }}</td>
             <td>{{row["created_at"] | toLocalTextFormat }}</td>

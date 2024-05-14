@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, tzinfo
 from zoneinfo import ZoneInfo
 
+import settings
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -32,3 +33,24 @@ def toLocalExpiryDateTextFormat(input_date: datetime):
         return input_date
     local_format = "%Y-%m-%d"
     return input_date.strftime(local_format)
+
+
+def is_expired_for_itemlist_in_html(days: int | None) -> bool:
+    if days is None:
+        return False
+    target = settings.ATTENTION_DISPLAY_FOR_HTML.get("DENGEROUS", None) or 0
+    return days <= target
+
+
+def is_caution_for_itemlist_in_html(days: int | None) -> bool:
+    if days is None:
+        return False
+    target = settings.ATTENTION_DISPLAY_FOR_HTML.get("CAUTION", None) or 30
+    return days <= target
+
+
+def is_somewhat_caution_for_itemlist_in_html(days: int | None) -> bool:
+    if days is None:
+        return False
+    target = settings.ATTENTION_DISPLAY_FOR_HTML.get("SOMEWHAT_CAUTION", None) or 183
+    return days <= target

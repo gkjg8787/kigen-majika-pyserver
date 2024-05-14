@@ -31,7 +31,6 @@
     </form>
     <p><a href="{{ url_for('read_users_items_edit',) }}?{{ PARAM_ID }}={{ id }}" class="plain-link">アイテム編集へ戻る</a></p>
     {% else %}
-    <p>商品名 : {{ name }}</p>
     <p>削除しました。<br>3秒後、戻ります。</p>
     <p><a href="{{ url_for('read_users_items') }}" class="plain-link">アイテム一覧へ戻る</a>
     {% endif %}

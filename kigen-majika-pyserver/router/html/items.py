@@ -30,6 +30,11 @@ templates.env.filters["toLocalTextFormat"] = s_util.toLocalTextFormat
 templates.env.filters["toLocalExpiryDateTextFormat"] = (
     s_util.toLocalExpiryDateTextFormat
 )
+templates.env.filters["is_expired"] = s_util.is_expired_for_itemlist_in_html
+templates.env.filters["is_caution"] = s_util.is_caution_for_itemlist_in_html
+templates.env.filters["is_somewhat_caution"] = (
+    s_util.is_somewhat_caution_for_itemlist_in_html
+)
 
 
 @router.get("/", response_class=HTMLResponse)

@@ -1,7 +1,7 @@
 import json
 import httpx
 
-from datetime import tzinfo
+from datetime import datetime, timezone, tzinfo
 
 from domain.models import Item, ItemSort, ItemStockFilter
 from .shared import htmlcontext, htmlname, htmlform, util as sutil
@@ -60,11 +60,15 @@ class ItemSortFormFactory:
         )
 
 
+class ViewItem(Item):
+    days_to_deadline: int | None = None
+
+
 class ItemListInHTMLResult(htmlcontext.HtmlContext):
     inventory_filter: htmlform.SelectForm
     sort_order: htmlform.SelectForm
     hidden_input_dict: dict
-    items: list[Item] = []
+    items: list[ViewItem] = []
     items_length: int = 0
     error_msg: str = ""
     PARAM_ID: str = htmlname.POSTNAME.ID.value
@@ -73,7 +77,11 @@ class ItemListInHTMLResult(htmlcontext.HtmlContext):
 class ItemListInHTMLResultFactory:
     @classmethod
     def create(
-        cls, itemlistgetform: ItemListGetForm, items: list[Item], error_msg: str = ""
+        cls,
+        itemlistgetform: ItemListGetForm,
+        items: list[dict],
+        error_msg: str = "",
+        local_timezone: tzinfo | None = None,
     ) -> ItemListInHTMLResult:
         items_length = len(items)
         hidden_input_dict = {}
@@ -81,16 +89,38 @@ class ItemListInHTMLResultFactory:
             hidden_input_dict["isort"] = itemlistgetform.isort
         if itemlistgetform.stock:
             hidden_input_dict["stock"] = itemlistgetform.stock
+        viewitems: list[ViewItem] = []
+        if items:
+            viewitems = cls.create_viewitems(items=items, tz=local_timezone)
         return ItemListInHTMLResult(
             inventory_filter=InventoryFilterFactory.create(
                 select_id=itemlistgetform.stock or 0
             ),
             sort_order=ItemSortFormFactory.create(select_id=itemlistgetform.isort or 0),
             hidden_input_dict=hidden_input_dict,
-            items=items,
+            items=viewitems,
             items_length=items_length,
             error_msg=error_msg,
         )
+
+    @classmethod
+    def create_viewitems(cls, items: list[dict], tz: tzinfo) -> list[ViewItem]:
+        results: list[ViewItem] = []
+        now = datetime.now(timezone.utc)
+        for i in items:
+            viewitem = ViewItem(**i)
+            results.append(viewitem)
+            cls.toLocaltimezone(item=viewitem, tz=tz)
+            if viewitem.expiry_date:
+                viewitem.days_to_deadline = (viewitem.expiry_date - now).days
+        return results
+
+    @classmethod
+    def toLocaltimezone(cls, item: ViewItem, tz: tzinfo) -> None:
+        if item.expiry_date:
+            item.expiry_date = sutil.utcTolocaltime(input_date=item.expiry_date, tz=tz)
+        item.created_at = sutil.utcTolocaltime(input_date=item.created_at, tz=tz)
+        item.updated_at = sutil.utcTolocaltime(input_date=item.updated_at, tz=tz)
 
 
 class ItemListInHTML:
@@ -115,19 +145,11 @@ class ItemListInHTML:
                 itemlistgetform=self.itemlistgetform,
                 items=[],
                 error_msg=htmlname.HTMLViewError.NOT_RESULT_API.jname,
+                local_timezone=self.local_timezone,
             )
         result = ItemListInHTMLResultFactory.create(
             **res.json(),
             itemlistgetform=self.itemlistgetform,
+            local_timezone=self.local_timezone
         )
-        if result.items:
-            result.items_length = len(result.items)
-            for i in result.items:
-                self.toLocaltimezone(item=i, tz=self.local_timezone)
         return result
-
-    def toLocaltimezone(self, item: Item, tz: tzinfo) -> None:
-        if item.expiry_date:
-            item.expiry_date = sutil.utcTolocaltime(input_date=item.expiry_date, tz=tz)
-        item.created_at = sutil.utcTolocaltime(input_date=item.created_at, tz=tz)
-        item.updated_at = sutil.utcTolocaltime(input_date=item.updated_at, tz=tz)

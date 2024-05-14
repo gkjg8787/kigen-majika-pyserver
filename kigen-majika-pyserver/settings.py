@@ -13,3 +13,8 @@ DATABASES = {
     "is_echo": False,
 }
 GET_INFO_ONLINE = True
+ATTENTION_DISPLAY_FOR_HTML = {
+    "DENGEROUS": 0,
+    "CAUTION": 30,
+    "SOMEWHAT_CAUTION": 183,
+}

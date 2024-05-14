@@ -36,6 +36,7 @@ class TestItemListInHTML:
             itemlistgetform=itemlistgetform,
             items=[],
             error_msg=htmlname.HTMLViewError.NOT_RESULT_API.jname,
+            local_timezone=sutil.JST,
         )
         assert comparing_data == res
 
@@ -84,6 +85,7 @@ class TestItemListInHTML:
         comparing_data = ItemListInHTMLResultFactory.create(
             **get_res.model_dump(),
             itemlistgetform=itemlistgetform,
+            local_timezone=sutil.JST,
         )
         assert comparing_data == res
         d = datetime.now(timezone.utc)
