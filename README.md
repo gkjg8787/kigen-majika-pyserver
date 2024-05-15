@@ -4,7 +4,7 @@
 
 - 消費期限を管理するための WEB サーバアプリケーション。
 - API がメインですが HTML での一覧の表示・追加・編集も可能です。
-- 足りない情報取得に以下のサイト様から情報を取得しています。
+- アイテム登録時に足りない情報取得（商品名、カテゴリー、メーカー）に以下のサイト様から情報を取得しています。
   `https://www.janken.jp/gadgets/jan/JanSyohinKensaku.php`
   <br>settings.py でオンラインの情報取得を OFF にすることもできます。
 
@@ -62,7 +62,7 @@
 
 ```
 ATTENTION_DISPLAY_FOR_HTML = {
-    "DENGEROUS": 0,
+    "DANGEROUS": 0,
     "CAUTION": 30,
     "SOMEWHAT_CAUTION": 183,
 }
@@ -70,7 +70,7 @@ ATTENTION_DISPLAY_FOR_HTML = {
 
 | 設定名           | 説明                     | 値   | デフォルト |
 | ---------------- | ------------------------ | ---- | ---------- |
-| GENGEROUS        | 危険と表示する残日数     | 数値 | 0          |
+| DANGEROUS        | 危険と表示する残日数     | 数値 | 0          |
 | CAUTION          | 注意と表示する残日数     | 数値 | 0          |
 | SOMEWHAT_CAUTION | やや注意と表示する残日数 | 数値 | 0          |
 

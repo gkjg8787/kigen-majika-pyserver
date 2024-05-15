@@ -38,7 +38,7 @@ def toLocalExpiryDateTextFormat(input_date: datetime):
 def is_expired_for_itemlist_in_html(days: int | None) -> bool:
     if days is None:
         return False
-    target = settings.ATTENTION_DISPLAY_FOR_HTML.get("DENGEROUS", None) or 0
+    target = settings.ATTENTION_DISPLAY_FOR_HTML.get("DANGEROUS", None) or 0
     return days <= target
 
 
