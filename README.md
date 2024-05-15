@@ -71,7 +71,7 @@ ATTENTION_DISPLAY_FOR_HTML = {
 | 設定名           | 説明                     | 値   | デフォルト |
 | ---------------- | ------------------------ | ---- | ---------- |
 | DANGEROUS        | 危険と表示する残日数     | 数値 | 0          |
-| CAUTION          | 注意と表示する残日数     | 数値 | 0          |
-| SOMEWHAT_CAUTION | やや注意と表示する残日数 | 数値 | 0          |
+| CAUTION          | 注意と表示する残日数     | 数値 | 30         |
+| SOMEWHAT_CAUTION | やや注意と表示する残日数 | 数値 | 183        |
 
 [TOP](#kigen-majika-pyserver)
