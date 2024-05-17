@@ -4,8 +4,8 @@ import json
 import httpx
 
 from .shared import htmlcontext, htmlname
-from router.html.param import AddItemPostForm
-from router.api.usecase import ItemCreateResult
+from router.html.param import AddItemPostForm, AddJanCodePostForm
+from router.api.usecase import ItemCreateResult, JanCodeInfoResult
 from application.items import IJanCodeInfoCreator
 
 
@@ -24,7 +24,7 @@ class AddItemFormResult(htmlcontext.HtmlContext):
     error_msg: str = ""
     jan_code: str = ""
     name: str = ""
-    inventory: int = 0
+    inventory: int = 1
     place: str = ""
     category: str = ""
     manufacturer: str = ""
@@ -33,28 +33,49 @@ class AddItemFormResult(htmlcontext.HtmlContext):
     local_timezone: str = htmlname.LocalTimeZone.JST
 
 
-class AddItemForm:
+class AddJanCodeFormResult(AddItemFormResult):
+    get_msg: str = ""
+
+
+class AddJanCodeForm:
     jancodeinfocreator: IJanCodeInfoCreator
+    addjancodepostform: AddJanCodePostForm
+
+    def __init__(
+        self,
+        jancodeinfocreator: IJanCodeInfoCreator,
+        addjancodepostform: AddJanCodePostForm,
+    ):
+        self.jancodeinfocreator = jancodeinfocreator
+        self.addjancodepostform = addjancodepostform
+
+    async def execute(self) -> AddJanCodeFormResult:
+        addjancodepostform: AddJanCodePostForm = self.addjancodepostform
+        res = await self.jancodeinfocreator.create(jan_code=addjancodepostform.jan_code)
+        return AddJanCodeFormResult(
+            is_next_page=False,
+            jan_code=res.jan_code,
+            name=res.name,
+            category=res.category,
+            manufacturer=res.manufacturer,
+            get_msg="",
+        )
+
+
+class AddItemForm:
     additempostform: AddItemPostForm
     create_url: str
 
     def __init__(
         self,
-        jancodeinfocreator: IJanCodeInfoCreator,
         additempostform: AddItemPostForm,
         create_url: str,
     ):
         self.additempostform = additempostform
-        self.jancodeinfocreator = jancodeinfocreator
         self.create_url = create_url
 
     async def execute(self) -> AddItemFormResult:
         additempostform: AddItemPostForm = self.additempostform
-        if not additempostform.name:
-            res = await self.jancodeinfocreator.create(
-                jan_code=additempostform.jan_code
-            )
-            additempostform.name = res.name
         result = await self.connect_to_create_api(
             url=self.create_url, additempostform=additempostform
         )

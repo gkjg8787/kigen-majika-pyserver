@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from main import app
 from router.html.param import (
     AddItemPostForm,
+    AddJanCodePostForm,
     EditItemGetForm,
     EditItemPostForm,
     DeleteItemPostForm,
@@ -15,6 +16,7 @@ from router.html.param import (
 )
 from router.html.usecase import (
     AddItemFormResult,
+    AddJanCodeFormResult,
     EditItemFormResult,
     DeleteItemFormResult,
 )
@@ -49,8 +51,29 @@ async def test_read_users_items(test_db, mocker):
 
 
 @pytest.mark.asyncio
+async def test_read_users_items_add_jancode(test_db, mocker):
+    response = client.get(f"{prefix}/add/jancode")
+    assert response.status_code == 200
+    is_html(response.text)
+
+
+@pytest.mark.asyncio
 async def test_read_users_items_add(test_db, mocker):
-    response = client.get(f"{prefix}/add/")
+    jancodeinfo_dict = {
+        "jan_code": "0123456789012",
+        "name": "test",
+        "category": "none",
+        "manufacturer": "maker",
+    }
+    addjancoderesult = AddJanCodeFormResult(is_next_page=False, **jancodeinfo_dict)
+    m1 = mocker.patch(
+        "router.html.usecase.additemform.AddJanCodeForm.execute",
+        return_value=addjancoderesult,
+    )
+    addjancodepostform = AddJanCodePostForm(jan_code=jancodeinfo_dict["jan_code"])
+    response = client.post(
+        f"{prefix}/add/", data=json.loads(addjancodepostform.model_dump_json())
+    )
     assert response.status_code == 200
     is_html(response.text)
 

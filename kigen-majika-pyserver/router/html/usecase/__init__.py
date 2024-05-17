@@ -1,4 +1,9 @@
-from .additemform import AddItemForm, AddItemFormResult
+from .additemform import (
+    AddItemForm,
+    AddItemFormResult,
+    AddJanCodeForm,
+    AddJanCodeFormResult,
+)
 from .itemlist_in_html import ItemListInHTML, ItemListInHTMLResult
 from .edititemform import EditItemInitForm, EditItemFormResult, EditItemForm
 from .deleteitemform import DeleteItemForm, DeleteItemFormResult, DeleteItemInitForm
@@ -6,6 +11,8 @@ from .deleteitemform import DeleteItemForm, DeleteItemFormResult, DeleteItemInit
 __all__ = [
     "AddItemForm",
     "AddItemFormResult",
+    "AddJanCodeForm",
+    "AddJanCodeFormResult",
     "ItemListInHTML",
     "ItemListInHTMLResult",
     "EditItemInitForm",

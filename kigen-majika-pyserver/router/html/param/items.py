@@ -34,6 +34,13 @@ class ItemListGetForm(BaseModel):
             self.stock = int(stock)
 
 
+class AddJanCodePostForm(BaseModel):
+    jan_code: str
+
+    def __init__(self, jan_code: str = Form()):
+        super().__init__(jan_code=jan_code)
+
+
 class AddItemPostForm(BaseModel):
     name: str | None
     jan_code: str

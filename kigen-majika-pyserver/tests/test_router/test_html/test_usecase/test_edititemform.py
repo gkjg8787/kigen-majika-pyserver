@@ -11,7 +11,7 @@ from router.html.usecase import (
 )
 from router.html.param import EditItemGetForm, EditItemPostForm
 from router.html.usecase.shared import htmlname, readitemform, util as sutil
-from externalfacade.items import ItemFactory
+from . import shared
 
 
 class DummyRequestResult:
@@ -24,32 +24,6 @@ class DummyRequestResult:
         return self.return_value
 
 
-def get_item(
-    id: int,
-    expiry_date: datetime | None = None,
-    created_at: datetime | None = None,
-    updated_at: datetime | None = None,
-):
-    now = datetime.now(timezone.utc)
-    if not created_at:
-        created_at = now
-    if not updated_at:
-        updated_at = now
-    return ItemFactory.create(
-        id=id,
-        name=f"test{id}",
-        jan_code=str(id),
-        inventory=1,
-        place="",
-        category="",
-        manufacturer="",
-        text="",
-        expiry_date=expiry_date,
-        created_at=created_at,
-        updated_at=updated_at,
-    )
-
-
 class TestEditItemInitForm:
 
     @pytest.mark.asyncio
@@ -57,7 +31,7 @@ class TestEditItemInitForm:
         target_id = 1
         edititemgetform = EditItemGetForm(id=str(target_id))
         now = datetime.now(timezone.utc)
-        item = get_item(id=target_id, created_at=now, updated_at=now)
+        item = shared.get_item(id=target_id, created_at=now, updated_at=now)
         m1 = mocker.patch(
             "router.html.usecase.edititemform.GetOneItemForm.execute",
             return_value=readitemform.GetOneItemResult(item=item),
@@ -147,7 +121,7 @@ class TestEditItemForm:
     async def test_execute_update(self, test_db, mocker):
         target_id = 1
         edititempostform = self.create_edititempostform(id=target_id)
-        item = get_item(id=target_id)
+        item = shared.get_item(id=target_id)
         itemupdateresult = ItemUpdateResult(is_update=True, item=item)
         m1 = mocker.patch(
             "router.html.usecase.edititemform.httpx.AsyncClient.post",

@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from .param import (
     ItemListGetForm,
     AddItemPostForm,
+    AddJanCodePostForm,
     EditItemGetForm,
     EditItemPostForm,
     DeleteItemPostForm,
@@ -14,6 +15,7 @@ from .param import (
 from .usecase import (
     AddItemFormResult,
     AddItemForm,
+    AddJanCodeForm,
     ItemListInHTML,
     EditItemInitForm,
     EditItemForm,
@@ -52,9 +54,33 @@ async def read_users_items(
     return ret
 
 
-@router.get("/add", response_class=HTMLResponse)
-async def read_users_items_add(request: Request):
+@router.get("/add/jancode", response_class=HTMLResponse)
+async def read_users_items_add_jancode(request: Request):
     context = AddItemFormResult().get_context()
+    return templates.TemplateResponse(
+        request=request,
+        name="users/addjancode.html",
+        context=context,
+    )
+
+
+@router.post("/add", response_class=HTMLResponse)
+async def read_users_items_add(
+    request: Request, addjancodeinfopostform: AddJanCodePostForm = Depends()
+):
+    result = await AddJanCodeForm(
+        jancodeinfocreator=ConnectToAPIJanCodeInfoCreator(
+            url=str(
+                request.url_for(
+                    "read_api_item_jancodeinfo",
+                    jan_code=addjancodeinfopostform.jan_code,
+                )
+            ),
+            factory=JanCodeInfoFactory(),
+        ),
+        addjancodepostform=addjancodeinfopostform,
+    ).execute()
+    context = result.get_context()
     return templates.TemplateResponse(
         request=request,
         name="users/additem.html",
@@ -68,14 +94,6 @@ async def read_users_items_add_post(
 ):
 
     result = await AddItemForm(
-        jancodeinfocreator=ConnectToAPIJanCodeInfoCreator(
-            url=str(
-                request.url_for(
-                    "read_api_item_jancodeinfo", jan_code=additempostform.jan_code
-                )
-            ),
-            factory=JanCodeInfoFactory(),
-        ),
         additempostform=additempostform,
         create_url=str(request.url_for("read_api_item_create")),
     ).execute()

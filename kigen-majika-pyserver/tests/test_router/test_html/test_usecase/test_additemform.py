@@ -4,12 +4,19 @@ import json
 import pytest
 
 from router.api.usecase import ItemCreateResult
-from router.html.usecase import AddItemForm, AddItemFormResult
-from router.html.param import AddItemPostForm
+from router.html.usecase import (
+    AddItemForm,
+    AddItemFormResult,
+    AddJanCodeForm,
+    AddJanCodeFormResult,
+)
+from router.html.param import AddItemPostForm, AddJanCodePostForm
 from router.html.usecase.shared import htmlname
-from domain.models import Item, JanCodeInfo
-from externalfacade.items import ItemFactory, JanCodeInfoFactory
+from domain.models import JanCodeInfo
+from externalfacade.items import JanCodeInfoFactory
 from application.items import IJanCodeInfoCreator
+
+from . import shared
 
 
 class DummyRequestResult:
@@ -53,30 +60,30 @@ class DummyJanCodeInfoCreator(IJanCodeInfoCreator):
         )
 
 
-class TestAddItemForm:
-
-    @classmethod
-    def get_item(cls, id: int, name: str = "") -> Item:
-        now = datetime.now(timezone.utc)
-        return ItemFactory.create(
-            id=id,
-            jan_code=str(id),
-            name=name,
-            inventory=0,
-            place="",
-            category="",
-            manufacturer="",
-            text="",
-            expiry_date=None,
-            created_at=now,
-            updated_at=now,
+class TestAddJanCodeForm:
+    @pytest.mark.asyncio
+    async def test_execute_get_jancodeinfo(self, mocker):
+        id = 1
+        item = shared.get_item(id=id)
+        name = "test"
+        addjancodepostform = AddJanCodePostForm(jan_code=item.jan_code)
+        addjancodeformresult = await AddJanCodeForm(
+            jancodeinfocreator=DummyJanCodeInfoCreator(name=name),
+            addjancodepostform=addjancodepostform,
+        ).execute()
+        comparing_data = AddJanCodeFormResult(
+            is_next_page=False, name=name, jan_code=item.jan_code
         )
+        assert comparing_data == addjancodeformresult
+
+
+class TestAddItemForm:
 
     @pytest.mark.asyncio
     async def test_execute_create(self, mocker):
         id = 1
         name = "test"
-        item = self.get_item(id=id, name=name)
+        item = shared.get_item(id=id, name=name)
         additempostform = AddItemPostForm(
             name="",  # None here to go find the name
             jan_code=item.jan_code,
@@ -98,7 +105,6 @@ class TestAddItemForm:
         )
         create_url = "dummy"
         additemformresult = await AddItemForm(
-            jancodeinfocreator=DummyJanCodeInfoCreator(name=name),
             additempostform=additempostform,
             create_url=create_url,
         ).execute()

@@ -8,7 +8,7 @@ from router.html.param import ItemListGetForm
 from router.html.usecase import ItemListInHTML
 from router.html.usecase.itemlist_in_html import ItemListInHTMLResultFactory
 from router.html.usecase.shared import util as sutil, htmlname
-from externalfacade.items import ItemFactory
+from . import shared
 
 
 class DummyRequestResult:
@@ -40,37 +40,11 @@ class TestItemListInHTML:
         )
         assert comparing_data == res
 
-    def get_item(
-        self,
-        id: int,
-        expiry_date: datetime | None = None,
-        created_at: datetime | None = None,
-        updated_at: datetime | None = None,
-    ):
-        now = datetime.now(timezone.utc)
-        if not created_at:
-            created_at = now
-        if not updated_at:
-            updated_at = now
-        return ItemFactory.create(
-            id=id,
-            name=f"test{id}",
-            jan_code=str(id),
-            inventory=1,
-            place="",
-            category="",
-            manufacturer="",
-            text="",
-            expiry_date=expiry_date,
-            created_at=created_at,
-            updated_at=updated_at,
-        )
-
     @pytest.mark.asyncio
     async def test_execute_one_data(self, test_db, mocker):
         target_id = 1
         now = datetime.now(timezone.utc)
-        items = [self.get_item(id=target_id, created_at=now, updated_at=now)]
+        items = [shared.get_item(id=target_id, created_at=now, updated_at=now)]
         get_res = ItemListResult(items=items)
         m1 = mocker.patch(
             "router.html.usecase.itemlist_in_html.httpx.AsyncClient.post",

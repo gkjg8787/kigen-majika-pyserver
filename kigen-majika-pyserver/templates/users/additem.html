@@ -3,16 +3,13 @@
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}" type="text/css">
     <title>アイテム追加</title>
-    {% if is_next_page %}
-    <meta http-equiv="refresh" content=" 3; url={{ url_for('read_users_items') }}">
-    {% endif %}
 {% endblock %}
 
 {% block body %}
     <h1>アイテム追加</h1>
     {%- if not is_next_page %}
     <form action="{{ url_for('read_users_items_add_post') }}" method="post">
-        <p>JANコード： <input type="text" name="{{ POST_JAN_CODE }}" class="jan_code_input" value="{{ jan_code }}" required></p>
+        <p>JANコード： {{ jan_code }}<input type="hidden" name="{{ POST_JAN_CODE }}" value="{{ jan_code }}"></p>
         <p>商品名： <input type="text" name="{{ POST_NAME }}" value="{{ name }}"></p>
         <p>在庫： <input type="number" name="{{ POST_INVENTORY }}" value="{{ inventory }}"></p>
         <p>保管場所： <input type="text" name="{{ POST_PLACE }}" value="{{ place }}"></p>
@@ -26,10 +23,19 @@
         {%- endif %}
         <p><input type="submit" value="登録"></p>
     </form>
+    <p><a href="{{ url_for('read_users_items_add_jancode') }}" class="plain-link">JANコードの入力へ戻る</a></p>
     {%- else %}
     <p>
       登録しました。
-      <br>3秒後、戻ります。
+    </p>
+    <p>
+      <form action="{{ url_for('read_users_items_add') }}" method="post">
+        <input type="hidden" name="{{ POST_JAN_CODE }}" value="{{ jan_code }}">
+        <input type="submit" value="同じJANコードで続けて追加する">
+      </form>
+    </p>
+    <p>
+        <a href="{{ url_for('read_users_items_add_jancode') }}" class="like_button_link">別のJANコードを追加する</a>
     </p>
     {%- endif %}
     <p><a href="{{ url_for('read_users_items') }}" class="plain-link">アイテム一覧へ戻る</a></p>

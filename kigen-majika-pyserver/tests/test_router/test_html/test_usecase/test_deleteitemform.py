@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, timezone
 import json
 
 import pytest
@@ -14,7 +14,7 @@ from router.html.usecase import (
 )
 from router.html.param import DeleteItemPostForm
 from router.html.usecase.shared import util as sutil
-from externalfacade.items import ItemFactory
+from . import shared
 
 
 class DummyRequestResult:
@@ -27,32 +27,6 @@ class DummyRequestResult:
         return self.return_value
 
 
-def get_item(
-    id: int,
-    expiry_date: datetime | None = None,
-    created_at: datetime | None = None,
-    updated_at: datetime | None = None,
-):
-    now = datetime.now(timezone.utc)
-    if not created_at:
-        created_at = now
-    if not updated_at:
-        updated_at = now
-    return ItemFactory.create(
-        id=id,
-        name=f"test{id}",
-        jan_code=str(id),
-        inventory=1,
-        place="",
-        category="",
-        manufacturer="",
-        text="",
-        expiry_date=expiry_date,
-        created_at=created_at,
-        updated_at=updated_at,
-    )
-
-
 class TestDeleteItemInitForm:
 
     @pytest.mark.asyncio
@@ -60,7 +34,7 @@ class TestDeleteItemInitForm:
         target_id = 1
         deleteitempostform = DeleteItemPostForm(id=str(target_id), name="")
         now = datetime.now(timezone.utc)
-        item = get_item(id=target_id, created_at=now, updated_at=now)
+        item = shared.get_item(id=target_id, created_at=now, updated_at=now)
         itemlistresult = ItemListResult(items=[item])
         m1 = mocker.patch(
             "router.html.usecase.edititemform.httpx.AsyncClient.post",
