@@ -9,7 +9,7 @@
     <h1>アイテム追加</h1>
     <p>追加する商品のJANコードを入力してください。</p>
     <form action="{{ url_for('read_users_items_add') }}" method="post">
-        <p>JANコード： <input type="text" name="{{ POST_JAN_CODE }}" class="jan_code_input" value="{{ jan_code }}" required></p>
+        <p>JANコード： <input type="number" name="{{ POST_JAN_CODE }}" class="jan_code_input" value="{{ jan_code }}" required></p>
         <p><input type="submit" value="次へ"></p>
     </form>
     <p><a href="{{ url_for('read_users_items') }}" class="plain-link">アイテム一覧へ戻る</a></p>

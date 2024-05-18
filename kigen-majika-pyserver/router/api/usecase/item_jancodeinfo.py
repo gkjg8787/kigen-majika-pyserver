@@ -16,6 +16,8 @@ class GetJanCodeInfo:
         self.jancodeinforepository = repository
 
     async def get(self, jan_code: str) -> JanCodeInfoResult:
+        if not jan_code:
+            return JanCodeInfoResult()
         jancodeinfo = await self.jancodeinforepository.find_by_jan_code(
             jan_code=jan_code
         )
@@ -40,6 +42,10 @@ class GetOnlineJanCodeInfo:
         self.get_info_online = get_info_online
 
     async def get_or_create(self, jan_code: str) -> JanCodeInfoResult:
+        if not jan_code:
+            return JanCodeInfoResult()
+        if jan_code.isdigit():
+            jan_code = str(int(jan_code)).zfill(len(jan_code))
         jancodeinfo = await self.jancodeinforepository.find_by_jan_code(
             jan_code=jan_code
         )
