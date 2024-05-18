@@ -60,3 +60,17 @@ class ItemStockFilter(Enum):
         self.id = id
         self.ename = self.name.lower()
         self.jname = text
+
+
+class ItemSearchType(Enum):
+    NAME = (1, "商品名")
+    JANCODE = (2, "JANコード")
+    CATEGORY = (3, "カテゴリー")
+    MANUFACTURER = (4, "メーカー")
+    PLACE = (5, "保管場所")
+    MEMO = (6, "備考")
+
+    def __init__(self, id: int, text: str):
+        self.id = id
+        self.ename = self.name.lower()
+        self.jname = text

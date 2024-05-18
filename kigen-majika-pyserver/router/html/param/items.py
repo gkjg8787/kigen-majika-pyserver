@@ -25,13 +25,21 @@ def toUtc(base: datetime, local_timezone: str):
 class ItemListGetForm(BaseModel):
     isort: int = 0
     stock: int = 0
+    stype: int = 0
+    word: str = ""
 
-    def __init__(self, isort: str = "", stock: str = ""):
+    def __init__(
+        self, isort: str = "", stock: str = "", stype: str = "", word: str = ""
+    ):
         super().__init__()
         if isort and isort.isdigit():
             self.isort = int(isort)
         if stock and stock.isdigit():
             self.stock = int(stock)
+        if stype and stype.isdigit():
+            self.stype = int(stype)
+        if word and len(word) <= 255:
+            self.word = word
 
 
 class AddJanCodePostForm(BaseModel):

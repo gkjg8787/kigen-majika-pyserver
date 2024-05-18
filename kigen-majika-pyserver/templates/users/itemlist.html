@@ -12,11 +12,11 @@
     <h3>フィルタ</h3>
     <p>
         {%- with
-            FORM_METHOD = inventory_filter.form_method,
-            FORM_ACTION = inventory_filter.form_action,
-            MENU_TITLE = inventory_filter.title,
-            MENU_NAME = inventory_filter.input_name,
-            menu_list = inventory_filter.menu_list,
+            FORM_METHOD = inventory_filter.form.method,
+            FORM_ACTION = inventory_filter.form.action,
+            MENU_TITLE = inventory_filter.select.title,
+            MENU_NAME = inventory_filter.select.input_name,
+            menu_list = inventory_filter.select.menu_list,
             hidden_input_dict = hidden_input_dict
         %}
         {%- include "shared/pulldown_menu_filter.html" %}
@@ -24,14 +24,28 @@
     </p>
     <p>
         {%- with
-            FORM_METHOD = sort_order.form_method,
-            FORM_ACTION = sort_order.form_action,
-            MENU_TITLE = sort_order.title,
-            MENU_NAME = sort_order.input_name,
-            menu_list = sort_order.menu_list,
+            FORM_METHOD = sort_order.form.method,
+            FORM_ACTION = sort_order.form.action,
+            MENU_TITLE = sort_order.select.title,
+            MENU_NAME = sort_order.select.input_name,
+            menu_list = sort_order.select.menu_list,
             hidden_input_dict = hidden_input_dict
         %}
         {%- include "shared/pulldown_menu_sort.html" %}
+        {%- endwith %}
+    </p>
+    <p>
+        {%- with
+            FORM_METHOD = search_filter.form.method,
+            FORM_ACTION = search_filter.form.action,
+            MENU_TITLE = search_filter.select.title,
+            MENU_NAME = search_filter.select.input_name,
+            menu_list = search_filter.select.menu_list,
+            INPUT_TEXT_NAME = search_filter.inputtext.name,
+            INPUT_TEXT_VALUE = search_filter.inputtext.value,
+            hidden_input_dict = hidden_input_dict
+        %}
+        {%- include "shared/keyword_search_filter.html" %}
         {%- endwith %}
     </p>
     <p><a href="{{ url_for('read_users_items') }}" class="plain-link">フィルタクリア</a></p>

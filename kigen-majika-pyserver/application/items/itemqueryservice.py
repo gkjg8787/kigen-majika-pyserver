@@ -9,6 +9,8 @@ from domain.models import Item
 class ItemQueryCommand(BaseModel):
     isort: int
     stock: int
+    stype: int
+    word: str
 
 
 class ItemQueryResult(BaseModel):

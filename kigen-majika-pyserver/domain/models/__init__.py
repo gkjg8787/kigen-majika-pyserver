@@ -4,6 +4,7 @@ from .items import (
     IItemFactory,
     ItemSort,
     ItemStockFilter,
+    ItemSearchType,
     IJanCodeInfoFactory,
     IItemRepository,
     IJanCodeInfoRepository,
@@ -21,4 +22,5 @@ __all__ = [
     # Enum
     "ItemSort",
     "ItemStockFilter",
+    "ItemSearchType",
 ]

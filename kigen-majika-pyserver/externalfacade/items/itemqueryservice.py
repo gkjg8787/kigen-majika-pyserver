@@ -1,8 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from domain.models import Item, ItemSort, ItemStockFilter
-from domain.service import ItemSortService, ItemStockFilterService
+from domain.models import Item, ItemSort, ItemStockFilter, ItemSearchType
+from domain.service import (
+    ItemSortService,
+    ItemStockFilterService,
+    ItemSearchTypeService,
+)
 from .items import (
     ItemInventory,
     ItemCategory,
@@ -48,6 +52,9 @@ class ItemQueryService(IItemQueryService):
             .join(ItemMemo, ItemInventory.id == ItemMemo.id)
         )
         stmt = await self.get_stockfilter_stmt(
+            itemquerycommand=itemquerycommand, stmt=stmt
+        )
+        stmt = await self.get_keyword_search_stmt(
             itemquerycommand=itemquerycommand, stmt=stmt
         )
         stmt = await self.get_sort_stmt(itemquerycommand=itemquerycommand, stmt=stmt)
@@ -99,3 +106,33 @@ class ItemQueryService(IItemQueryService):
             case ItemSort.ITEMNAME_DESC:
                 return stmt.order_by(ItemName.name.desc())
         return get_default_order_by(stmt)
+
+    async def get_keyword_search_stmt(self, itemquerycommand: ItemQueryCommand, stmt):
+        def get_default_keyword_search(stmt):
+            return stmt
+
+        if not itemquerycommand.stype or not itemquerycommand.word:
+            return get_default_keyword_search(stmt)
+        search_type: ItemSearchType = await ItemSearchTypeService().get(
+            search_type=itemquerycommand.stype
+        )
+        if not search_type:
+            return get_default_keyword_search(stmt)
+        match search_type:
+            case ItemSearchType.NAME:
+                return stmt.where(ItemName.name.contains(itemquerycommand.word))
+            case ItemSearchType.JANCODE:
+                return stmt.where(
+                    ItemInventory.jan_code.contains(itemquerycommand.word)
+                )
+            case ItemSearchType.CATEGORY:
+                return stmt.where(ItemCategory.category.contains(itemquerycommand.word))
+            case ItemSearchType.MANUFACTURER:
+                return stmt.where(
+                    ItemManufacturer.manufacturer.contains(itemquerycommand.word)
+                )
+            case ItemSearchType.PLACE:
+                return stmt.where(ItemInventory.place.contains(itemquerycommand.word))
+            case ItemSearchType.MEMO:
+                return stmt.where(ItemMemo.text.contains(itemquerycommand.word))
+        return get_default_keyword_search(stmt)

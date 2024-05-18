@@ -3,6 +3,7 @@ from .items import (
     JanCodeInfo,
     ItemSort,
     ItemStockFilter,
+    ItemSearchType,
 )
 from .factory import (
     IItemFactory,
@@ -25,4 +26,5 @@ __all__ = [
     # Enum
     "ItemSort",
     "ItemStockFilter",
+    "ItemSearchType",
 ]

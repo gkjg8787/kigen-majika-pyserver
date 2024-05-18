@@ -4,7 +4,7 @@ import pytest
 
 from externalfacade.items import ItemQueryService, ItemRepository
 from application.items import ItemQueryCommand
-from domain.models import Item, ItemSort, ItemStockFilter
+from domain.models import Item, ItemSort, ItemStockFilter, ItemSearchType
 
 from . import shared
 
@@ -35,6 +35,11 @@ class TestItemQuerySerice:
             date_format
         )
 
+    def create_itemquerycommand(
+        self, isort: int = 0, stock: int = 0, stype: int = 0, word=""
+    ) -> ItemQueryCommand:
+        return ItemQueryCommand(isort=isort, stock=stock, stype=stype, word=word)
+
     @pytest.mark.asyncio
     async def test_find_all_three_data(self, test_db):
         def create_item(id: int):
@@ -53,7 +58,7 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=0, stock=0)
+            command = self.create_itemquerycommand()
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == 3
@@ -118,7 +123,7 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=0, stock=0)
+            command = self.create_itemquerycommand()
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -134,7 +139,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=ItemSort.NEAR_EXPIRY.id, stock=0)
+            command = self.create_itemquerycommand(
+                isort=ItemSort.NEAR_EXPIRY.id, stock=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -150,7 +157,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=ItemSort.FAR_EXPIRY.id, stock=0)
+            command = self.create_itemquerycommand(
+                isort=ItemSort.FAR_EXPIRY.id, stock=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -168,7 +177,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=ItemSort.OLD_REGIST.id, stock=0)
+            command = self.create_itemquerycommand(
+                isort=ItemSort.OLD_REGIST.id, stock=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -184,7 +195,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=ItemSort.NEW_REGIST.id, stock=0)
+            command = self.create_itemquerycommand(
+                isort=ItemSort.NEW_REGIST.id, stock=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -202,7 +215,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=ItemSort.ITEMNAME_ASC.id, stock=0)
+            command = self.create_itemquerycommand(
+                isort=ItemSort.ITEMNAME_ASC.id, stock=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -218,7 +233,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(isort=ItemSort.ITEMNAME_DESC.id, stock=0)
+            command = self.create_itemquerycommand(
+                isort=ItemSort.ITEMNAME_DESC.id, stock=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             assert len(ret) == len(itemlist)
@@ -237,7 +254,9 @@ class TestItemQuerySerice:
                 await repo.save(a)
 
             iqs = ItemQueryService(db)
-            command = ItemQueryCommand(stock=ItemStockFilter.IN_STOCK.id, isort=0)
+            command = self.create_itemquerycommand(
+                stock=ItemStockFilter.IN_STOCK.id, isort=0
+            )
             ret = await iqs.find_all(command)
             ret = ret.items
             comparing_list = get_stock_items(itemlist)
@@ -256,11 +275,188 @@ class TestItemQuerySerice:
             for a in itemlist:
                 await repo.save(a)
 
-            iqs = ItemQueryService(db)
+            iqs = self.create_itemquerycommand(db)
             command = ItemQueryCommand(stock=ItemStockFilter.NO_STOCK.id, isort=0)
             ret = await iqs.find_all(command)
             ret = ret.items
             comparing_list = get_no_stock_items(itemlist)
             assert len(ret) == len(comparing_list)
             for r, i in zip(ret, sorted(comparing_list, key=lambda i: i.expiry_date)):
+                await self.assert_comparing_two_items(r, i)
+
+    @classmethod
+    def get_items_for_keyword_search(cls) -> list[Item]:
+        items_base = [
+            {
+                "id": 1,
+                "jan_code": str(1).zfill(13),
+                "name": "aaa",
+                "place": "a_place",
+                "category": "a_cate",
+                "manufacturer": "a_maker",
+                "text": "a_text",
+            },
+            {
+                "id": 2,
+                "jan_code": str(2).zfill(13),
+                "name": "bbb",
+                "place": "b_place",
+                "category": "b_cate",
+                "manufacturer": "b_maker",
+                "text": "b_text",
+            },
+            {
+                "id": 3,
+                "jan_code": str(1).zfill(13),
+                "name": "aaa",
+                "place": "b_place",
+                "category": "a_cate",
+                "manufacturer": "a_maker",
+                "text": "c_text",
+            },
+            {
+                "id": 4,
+                "jan_code": str(4).zfill(13),
+                "name": "ccc",
+                "place": "c_place",
+                "category": "c_cate",
+                "manufacturer": "c_maker",
+                "text": "c_text",
+            },
+        ]
+        results: list[Item] = []
+        for i in items_base:
+            results.append(shared.get_item(**i))
+        return results
+
+    @pytest.mark.asyncio
+    async def test_find_all_keyword_search_name(self, test_db):
+        def get_comparing_items(items: list[Item]):
+            return [i for i in items if "aaa" in i.name]
+
+        itemlist: list[Item] = self.get_items_for_keyword_search()
+        async for db in test_db:
+            repo = ItemRepository(db)
+            for a in itemlist:
+                await repo.save(a)
+
+            iqs = ItemQueryService(db)
+            command = self.create_itemquerycommand(
+                stype=ItemSearchType.NAME.id, word="aaa"
+            )
+            ret = await iqs.find_all(command)
+            ret = ret.items
+            comparing_list = get_comparing_items(itemlist)
+            assert len(ret) == len(comparing_list)
+            for r, i in zip(ret, comparing_list):
+                await self.assert_comparing_two_items(r, i)
+
+    @pytest.mark.asyncio
+    async def test_find_all_keyword_search_jancode(self, test_db):
+        def get_comparing_items(items: list[Item]):
+            return [i for i in items if str(2).zfill(13) in i.jan_code]
+
+        itemlist: list[Item] = self.get_items_for_keyword_search()
+        async for db in test_db:
+            repo = ItemRepository(db)
+            for a in itemlist:
+                await repo.save(a)
+
+            iqs = ItemQueryService(db)
+            command = self.create_itemquerycommand(
+                stype=ItemSearchType.JANCODE.id, word=str(2).zfill(13)
+            )
+            ret = await iqs.find_all(command)
+            ret = ret.items
+            comparing_list = get_comparing_items(itemlist)
+            assert len(ret) == len(comparing_list)
+            for r, i in zip(ret, comparing_list):
+                await self.assert_comparing_two_items(r, i)
+
+    @pytest.mark.asyncio
+    async def test_find_all_keyword_search_category(self, test_db):
+        def get_comparing_items(items: list[Item]):
+            return [i for i in items if "c_cate" in i.category]
+
+        itemlist: list[Item] = self.get_items_for_keyword_search()
+        async for db in test_db:
+            repo = ItemRepository(db)
+            for a in itemlist:
+                await repo.save(a)
+
+            iqs = ItemQueryService(db)
+            command = self.create_itemquerycommand(
+                stype=ItemSearchType.CATEGORY.id, word="c_cate"
+            )
+            ret = await iqs.find_all(command)
+            ret = ret.items
+            comparing_list = get_comparing_items(itemlist)
+            assert len(ret) == len(comparing_list)
+            for r, i in zip(ret, comparing_list):
+                await self.assert_comparing_two_items(r, i)
+
+    @pytest.mark.asyncio
+    async def test_find_all_keyword_search_manufacturer(self, test_db):
+        def get_comparing_items(items: list[Item]):
+            return [i for i in items if "b_maker" in i.category]
+
+        itemlist: list[Item] = self.get_items_for_keyword_search()
+        async for db in test_db:
+            repo = ItemRepository(db)
+            for a in itemlist:
+                await repo.save(a)
+
+            iqs = ItemQueryService(db)
+            command = self.create_itemquerycommand(
+                stype=ItemSearchType.MANUFACTURER.id, word="b_maker"
+            )
+            ret = await iqs.find_all(command)
+            ret = ret.items
+            comparing_list = get_comparing_items(itemlist)
+            assert len(ret) == len(comparing_list)
+            for r, i in zip(ret, comparing_list):
+                await self.assert_comparing_two_items(r, i)
+
+    @pytest.mark.asyncio
+    async def test_find_all_keyword_search_place(self, test_db):
+        def get_comparing_items(items: list[Item]):
+            return [i for i in items if "a_place" in i.category]
+
+        itemlist: list[Item] = self.get_items_for_keyword_search()
+        async for db in test_db:
+            repo = ItemRepository(db)
+            for a in itemlist:
+                await repo.save(a)
+
+            iqs = ItemQueryService(db)
+            command = self.create_itemquerycommand(
+                stype=ItemSearchType.PLACE.id, word="a_place"
+            )
+            ret = await iqs.find_all(command)
+            ret = ret.items
+            comparing_list = get_comparing_items(itemlist)
+            assert len(ret) == len(comparing_list)
+            for r, i in zip(ret, comparing_list):
+                await self.assert_comparing_two_items(r, i)
+
+    @pytest.mark.asyncio
+    async def test_find_all_keyword_search_memo(self, test_db):
+        def get_comparing_items(items: list[Item]):
+            return [i for i in items if "c_text" in i.category]
+
+        itemlist: list[Item] = self.get_items_for_keyword_search()
+        async for db in test_db:
+            repo = ItemRepository(db)
+            for a in itemlist:
+                await repo.save(a)
+
+            iqs = ItemQueryService(db)
+            command = self.create_itemquerycommand(
+                stype=ItemSearchType.MEMO.id, word="c_text"
+            )
+            ret = await iqs.find_all(command)
+            ret = ret.items
+            comparing_list = get_comparing_items(itemlist)
+            assert len(ret) == len(comparing_list)
+            for r, i in zip(ret, comparing_list):
                 await self.assert_comparing_two_items(r, i)

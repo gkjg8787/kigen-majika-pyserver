@@ -1,5 +1,9 @@
 from .itemidentity import IItemIdentity
-from .itemfilterservice import ItemSortService, ItemStockFilterService
+from .itemfilterservice import (
+    ItemSortService,
+    ItemStockFilterService,
+    ItemSearchTypeService,
+)
 
 __all__ = [
     # interface
@@ -7,4 +11,5 @@ __all__ = [
     # service
     "ItemSortService",
     "ItemStockFilterService",
+    "ItemSearchTypeService",
 ]

@@ -22,6 +22,8 @@ class POSTNAME(AutoLowerName):
 class GETNAME(AutoLowerName):
     ISORT = auto()
     STOCK = auto()
+    STYPE = auto()
+    WORD = auto()
 
 
 class LocalTimeZone:

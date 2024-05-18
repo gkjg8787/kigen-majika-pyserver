@@ -1,5 +1,9 @@
-from domain.models import Item, ItemSort, ItemStockFilter
-from domain.service import ItemSortService, ItemStockFilterService
+from domain.models import Item, ItemSort, ItemStockFilter, ItemSearchType
+from domain.service import (
+    ItemSortService,
+    ItemStockFilterService,
+    ItemSearchTypeService,
+)
 
 
 from application.items import IItemQueryService, ItemQueryCommand, ItemQueryResult
@@ -18,6 +22,10 @@ class ItemQueryDictService(IItemQueryService):
                 if not await self.is_stock(itemquerycommand=itemquerycommand, item=v):
                     continue
             results.append(v)
+        if itemquerycommand.stype:
+            results = await self.keyword_search(
+                itemquerycommand=itemquerycommand, items=results
+            )
         if itemquerycommand.isort:
             results = await self.sort_items(
                 itemquerycommand=itemquerycommand, items=results
@@ -64,3 +72,32 @@ class ItemQueryDictService(IItemQueryService):
             case ItemSort.ITEMNAME_DESC:
                 return sorted(items, key=lambda i: i.name, reverse=True)
         return get_default_order_by(items)
+
+    async def keyword_search(
+        self, itemquerycommand: ItemQueryCommand, items: list[Item]
+    ) -> list[Item]:
+        def get_default_keyword_search(items: list[Item]):
+            return items
+
+        if not itemquerycommand.stype or not itemquerycommand.word:
+            return get_default_keyword_search(items)
+        search_type = await ItemSearchTypeService().get(
+            search_type=itemquerycommand.stype
+        )
+        if not search_type:
+            return get_default_keyword_search(items)
+        match search_type:
+            case ItemSearchType.NAME:
+                return [i for i in items if itemquerycommand.word in i.name]
+            case ItemSearchType.JANCODE:
+                return [i for i in items if itemquerycommand.word in i.jan_code]
+            case ItemSearchType.CATEGORY:
+                return [i for i in items if itemquerycommand.word in i.category]
+            case ItemSearchType.MANUFACTURER:
+                return [i for i in items if itemquerycommand.word in i.manufacturer]
+
+            case ItemSearchType.PLACE:
+                return [i for i in items if itemquerycommand.word in i.place]
+            case ItemSearchType.MEMO:
+                return [i for i in items if itemquerycommand.word in i.text]
+        return get_default_keyword_search(items)

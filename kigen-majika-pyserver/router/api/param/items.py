@@ -6,6 +6,8 @@ from pydantic import BaseModel, field_validator
 class ItemListRequestParam(BaseModel):
     isort: int = 0
     stock: int = 0
+    stype: int = 0
+    word: str = ""
 
 
 class ItemRequestParam(BaseModel):

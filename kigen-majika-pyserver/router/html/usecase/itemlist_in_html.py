@@ -3,8 +3,8 @@ import httpx
 
 from datetime import datetime, timezone, tzinfo
 
-from domain.models import Item, ItemSort, ItemStockFilter
-from .shared import htmlcontext, htmlname, htmlform, util as sutil
+from domain.models import Item, ItemSort, ItemStockFilter, ItemSearchType
+from .shared import htmlcontext, htmlname, htmlelement, util as sutil
 from router.html.param import ItemListGetForm
 
 
@@ -18,19 +18,18 @@ class InventoryFilterFactory:
         title: str = "在庫状況",
         input_name: str = htmlname.GETNAME.STOCK.value,
         select_id: int = 0,
-    ) -> htmlform.SelectForm:
-        menu_list: list[htmlform.SelectOption] = []
+    ) -> htmlelement.SelectForm:
+        menu_list: list[htmlelement.SelectOption] = []
         for s in ItemStockFilter:
-            selectopt = htmlform.SelectOption(id=s.id, text=s.jname, selected="")
+            selectopt = htmlelement.SelectOption(id=s.id, text=s.jname, selected="")
             if select_id == s.id:
                 selectopt.selected = htmlname.HTMLTemplateValue.SELECTED
             menu_list.append(selectopt)
-        return htmlform.SelectForm(
-            form_method=form_method,
-            form_action=form_action,
-            title=title,
-            input_name=input_name,
-            menu_list=menu_list,
+        return htmlelement.SelectForm(
+            form=htmlelement.Form(method=form_method, action=form_action),
+            select=htmlelement.Select(
+                title=title, input_name=input_name, menu_list=menu_list
+            ),
         )
 
 
@@ -44,19 +43,46 @@ class ItemSortFormFactory:
         title: str = "並び替え",
         input_name: str = htmlname.GETNAME.ISORT.value,
         select_id: int = 0,
-    ) -> htmlform.SelectForm:
-        menu_list: list[htmlform.SelectOption] = []
+    ) -> htmlelement.SelectForm:
+        menu_list: list[htmlelement.SelectOption] = []
         for i in ItemSort:
-            selectopt = htmlform.SelectOption(id=i.id, text=i.jname, selected="")
+            selectopt = htmlelement.SelectOption(id=i.id, text=i.jname, selected="")
             if select_id == i.id:
                 selectopt.selected = htmlname.HTMLTemplateValue.SELECTED
             menu_list.append(selectopt)
-        return htmlform.SelectForm(
-            form_method=form_method,
-            form_action=form_action,
-            title=title,
-            input_name=input_name,
-            menu_list=menu_list,
+        return htmlelement.SelectForm(
+            form=htmlelement.Form(method=form_method, action=form_action),
+            select=htmlelement.Select(
+                title=title, input_name=input_name, menu_list=menu_list
+            ),
+        )
+
+
+class ItemSearchTypeSelectSearchFactory:
+    @classmethod
+    def create(
+        cls,
+        form_method: str = htmlname.FORMMETHOD.GET.value,
+        form_action: str = "",
+        title: str = "検索対象",
+        input_name: str = htmlname.GETNAME.STYPE.value,
+        selected_id: int = 0,
+        word: str = "",
+    ) -> htmlelement.SelectSearch:
+        menu_list: list[htmlelement.SelectOption] = []
+        for i in ItemSearchType:
+            selectopt = htmlelement.SelectOption(id=i.id, text=i.jname, selected="")
+            if selected_id == i.id:
+                selectopt.selected = htmlname.HTMLTemplateValue.SELECTED
+            menu_list.append(selectopt)
+        return htmlelement.SelectSearch(
+            form=htmlelement.Form(method=form_method, action=form_action),
+            select=htmlelement.Select(
+                title=title, input_name=input_name, menu_list=menu_list
+            ),
+            inputtext=htmlelement.InputText(
+                name=htmlname.GETNAME.WORD.value, value=word
+            ),
         )
 
 
@@ -65,8 +91,9 @@ class ViewItem(Item):
 
 
 class ItemListInHTMLResult(htmlcontext.HtmlContext):
-    inventory_filter: htmlform.SelectForm
-    sort_order: htmlform.SelectForm
+    inventory_filter: htmlelement.SelectForm
+    sort_order: htmlelement.SelectForm
+    search_filter: htmlelement.SelectSearch
     hidden_input_dict: dict
     items: list[ViewItem] = []
     items_length: int = 0
@@ -89,6 +116,8 @@ class ItemListInHTMLResultFactory:
             hidden_input_dict["isort"] = itemlistgetform.isort
         if itemlistgetform.stock:
             hidden_input_dict["stock"] = itemlistgetform.stock
+        if itemlistgetform.stype:
+            hidden_input_dict["stype"] = itemlistgetform.stype
         viewitems: list[ViewItem] = []
         if items:
             viewitems = cls.create_viewitems(items=items, tz=local_timezone)
@@ -97,6 +126,9 @@ class ItemListInHTMLResultFactory:
                 select_id=itemlistgetform.stock or 0
             ),
             sort_order=ItemSortFormFactory.create(select_id=itemlistgetform.isort or 0),
+            search_filter=ItemSearchTypeSelectSearchFactory.create(
+                selected_id=itemlistgetform.stype or 0, word=itemlistgetform.word
+            ),
             hidden_input_dict=hidden_input_dict,
             items=viewitems,
             items_length=items_length,
