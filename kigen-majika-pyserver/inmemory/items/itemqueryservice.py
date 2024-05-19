@@ -90,7 +90,7 @@ class ItemQueryDictService(IItemQueryService):
             case ItemSearchType.NAME:
                 return [i for i in items if itemquerycommand.word in i.name]
             case ItemSearchType.JANCODE:
-                return [i for i in items if itemquerycommand.word in i.jan_code]
+                return [i for i in items if itemquerycommand.word in i.jan_code.value]
             case ItemSearchType.CATEGORY:
                 return [i for i in items if itemquerycommand.word in i.category]
             case ItemSearchType.MANUFACTURER:

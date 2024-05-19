@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 
 from pydantic import BaseModel
 
-from domain.models import IItemRepository, Item, IItemFactory
-from router.api.param import ItemUpdateParam
+from domain.models import IItemRepository, Item, IItemFactory, IJanCodeFactory
+from router.api.param import ItemUpdateParam, ItemUpdateParamToDomain, ItemToParam
 
 
 class ItemUpdateResult(BaseModel):
@@ -15,10 +15,17 @@ class ItemUpdateResult(BaseModel):
 class ItemUpdate:
     itemrepository: IItemRepository
     itemfactory: IItemFactory
+    jancodefactory: IJanCodeFactory
 
-    def __init__(self, itemrepository: IItemRepository, itemfactory: IItemFactory):
+    def __init__(
+        self,
+        itemrepository: IItemRepository,
+        itemfactory: IItemFactory,
+        jancodefactory: IJanCodeFactory,
+    ):
         self.itemrepository = itemrepository
         self.itemfactory = itemfactory
+        self.jancodefactory = jancodefactory
 
     async def update(self, itemupdateparam: ItemUpdateParam) -> ItemUpdateResult:
         item = await self.itemrepository.find_by_id(itemupdateparam.id)
@@ -26,12 +33,29 @@ class ItemUpdate:
             return ItemUpdateResult(
                 is_update=False, error_msg=f"Not Found Data id={itemupdateparam.id}"
             )
-        if ItemUpdateParam(**item.model_dump()) == itemupdateparam:
+        if self.toItemUpdateParam(item=item) == itemupdateparam:
             return ItemUpdateResult(is_update=False, error_msg=f"no update parameter")
-        new_item = self.itemfactory.create(
-            **itemupdateparam.model_dump(),
+        new_item = self.toItem(
+            itemupdateparam=itemupdateparam,
             created_at=item.created_at,
             updated_at=datetime.now(timezone.utc),
         )
         await self.itemrepository.save(new_item)
         return ItemUpdateResult(item=new_item, is_update=True)
+
+    def toItemUpdateParam(self, item: Item) -> ItemUpdateParam:
+        return ItemToParam().toItemUpdateParam(item=item)
+
+    def toItem(
+        self,
+        itemupdateparam: ItemUpdateParam,
+        created_at: datetime,
+        updated_at: datetime,
+    ) -> Item:
+        return ItemUpdateParamToDomain(
+            itemfactory=self.itemfactory, jancodefactory=self.jancodefactory
+        ).toItem(
+            itemupdateparam=itemupdateparam,
+            created_at=created_at,
+            updated_at=updated_at,
+        )

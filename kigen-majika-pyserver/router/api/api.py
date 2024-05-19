@@ -10,6 +10,7 @@ from externalfacade.items import (
     JanCodeInfoRepository,
     ItemIdentity,
     ItemFactory,
+    JanCodeFactory,
     JanCodeInfoFactory,
 )
 from application.items import OnlineJanCodeInfoCreator
@@ -70,6 +71,7 @@ async def read_api_item_jancodeinfo(
     results = await GetOnlineJanCodeInfo(
         repository=JanCodeInfoRepository(db),
         jancodeinfocreator=OnlineJanCodeInfoCreator(factory=JanCodeInfoFactory()),
+        jancodefactory=JanCodeFactory(),
         get_info_online=settings.GET_INFO_ONLINE,
     ).get_or_create(jan_code=jan_code)
     return results
@@ -85,6 +87,7 @@ async def read_api_item_create(
         itemrepository=ItemRepository(db),
         itemidentity=ItemIdentity(db),
         itemfactory=ItemFactory(),
+        jancodefactory=JanCodeFactory(),
         jancodeinforepository=JanCodeInfoRepository(db),
     ).create(itemcreateparam)
     return itemcreateresult
@@ -97,7 +100,9 @@ async def read_api_item_update(
     db: AsyncSession = Depends(get_async_session),
 ):
     itemuupdateresult = await ItemUpdate(
-        itemrepository=ItemRepository(db), itemfactory=ItemFactory()
+        itemrepository=ItemRepository(db),
+        itemfactory=ItemFactory(),
+        jancodefactory=JanCodeFactory(),
     ).update(itemupdateparam)
     return itemuupdateresult
 

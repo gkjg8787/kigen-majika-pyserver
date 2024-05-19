@@ -9,7 +9,7 @@
     <input type="text" name="{{ INPUT_TEXT_NAME }}" value="{{ INPUT_TEXT_VALUE }}">
     <input type="submit" value="検索">
     {% for k, v in hidden_input_dict.items() %}
-        {% if k != MENU_NAME and v != "" %}
+        {% if k != MENU_NAME and v != "" and k != INPUT_TEXT_NAME %}
         <input type="hidden" name="{{ k }}" value="{{ v }}">
         {% endif %}
     {% endfor %}

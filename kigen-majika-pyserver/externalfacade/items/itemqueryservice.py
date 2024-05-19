@@ -14,7 +14,7 @@ from .items import (
     ItemMemo,
     ItemName,
 )
-from .factory import ItemFactory
+from .factory import ItemFactory, JanCodeFactory
 from .dbconvert import DBToItem
 
 from application.items import IItemQueryService, ItemQueryCommand, ItemQueryResult
@@ -28,7 +28,7 @@ class ItemQueryService(IItemQueryService):
 
     @classmethod
     def _to_items(cls, select_results):
-        dbtoitem = DBToItem(ItemFactory())
+        dbtoitem = DBToItem(itemfactory=ItemFactory(), jancodefactory=JanCodeFactory())
         results: list[Item] = []
         for r in select_results:
             item = dbtoitem.toItem(

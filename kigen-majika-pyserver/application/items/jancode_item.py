@@ -5,13 +5,13 @@ from pydantic import BaseModel, ConfigDict
 from bs4 import BeautifulSoup
 
 from application.download import async_download_text, DownloadCommand, DownloadType
-from domain.models import JanCodeInfo, IJanCodeInfoFactory
+from domain.models import JanCodeInfo, IJanCodeInfoFactory, JanCode, IJanCodeFactory
 
 
 class JanCodeInfoData(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     jancodeinfofactory: IJanCodeInfoFactory
-    jan_code: str
+    jan_code: JanCode
     name: str = ""
     category: str = ""
     manufacturer: str = ""
@@ -62,7 +62,7 @@ class JanSyohinKensakuResult:
 class IJanCodeInfoCreator(metaclass=ABCMeta):
 
     @abstractmethod
-    async def create(self, jan_code: str) -> JanCodeInfo:
+    async def create(self, jan_code: JanCode) -> JanCodeInfo:
         pass
 
 
@@ -73,8 +73,8 @@ class OnlineJanCodeInfoCreator(IJanCodeInfoCreator):
     def __init__(self, factory: IJanCodeInfoFactory):
         self.jancodeinfofactory = factory
 
-    async def create(self, jan_code: str) -> JanCodeInfo:
-        if not jan_code or not jan_code.isdigit():
+    async def create(self, jan_code: JanCode) -> JanCodeInfo:
+        if not jan_code:
             return JanCodeInfoData(
                 jancodeinfofactory=self.jancodeinfofactory, jan_code=jan_code
             ).toJanCodeInfo()
@@ -82,7 +82,7 @@ class OnlineJanCodeInfoCreator(IJanCodeInfoCreator):
             DownloadCommand(
                 url=self.url,
                 downloadtype=DownloadType.POST,
-                params={"dummy": "", "jan": jan_code},
+                params={"dummy": "", "jan": jan_code.value},
             )
         )
         if not ret:

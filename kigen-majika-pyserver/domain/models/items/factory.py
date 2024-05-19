@@ -1,7 +1,7 @@
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 
-from .items import Item, JanCodeInfo
+from .items import Item, JanCodeInfo, JanCode
 
 
 class IItemFactory(metaclass=ABCMeta):
@@ -11,7 +11,7 @@ class IItemFactory(metaclass=ABCMeta):
         cls,
         id: int,
         name: str,
-        jan_code: str,
+        jan_code: JanCode,
         inventory: int,
         place: str,
         category: str,
@@ -24,12 +24,19 @@ class IItemFactory(metaclass=ABCMeta):
         pass
 
 
+class IJanCodeFactory(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def create(cls, jan_code: str) -> JanCode:
+        pass
+
+
 class IJanCodeInfoFactory(metaclass=ABCMeta):
     @classmethod
     @abstractmethod
     def create(
         cls,
-        jan_code: str,
+        jan_code: JanCode,
         name: str,
         category: str,
         manufacturer: str,

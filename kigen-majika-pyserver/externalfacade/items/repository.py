@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from domain.models import (
     Item,
+    JanCode,
     JanCodeInfo,
     IItemRepository,
     IJanCodeInfoRepository,
@@ -16,7 +17,7 @@ from .items import (
     ItemMemo,
     ItemManufacturer,
 )
-from .factory import ItemFactory, JanCodeInfoFactory
+from .factory import ItemFactory, JanCodeInfoFactory, JanCodeFactory
 from .dbconvert import ItemToDBObject, DBToItem, JanCodeInfoToDBObject, DBToJanCodeInfo
 from .dbdata_compare import (
     ItemInventoryDataCompare,
@@ -49,7 +50,7 @@ class ItemRepository(IItemRepository):
             await db.commit()
             await db.refresh(iinv)
 
-        iname: ItemName = await db.get(ItemName, item.jan_code)
+        iname: ItemName = await db.get(ItemName, item.jan_code.value)
         new_iname = ItemToDBObject.toItemName(item)
         if not iname:
             db.add(new_iname)
@@ -61,7 +62,7 @@ class ItemRepository(IItemRepository):
             await db.commit()
             await db.refresh(iname)
 
-        icate: ItemCategory = await db.get(ItemCategory, item.jan_code)
+        icate: ItemCategory = await db.get(ItemCategory, item.jan_code.value)
         new_icate = ItemToDBObject.toItemCategory(item)
         if not icate:
             db.add(new_icate)
@@ -73,7 +74,7 @@ class ItemRepository(IItemRepository):
             await db.commit()
             await db.refresh(icate)
 
-        imanu: ItemManufacturer = await db.get(ItemManufacturer, item.jan_code)
+        imanu: ItemManufacturer = await db.get(ItemManufacturer, item.jan_code.value)
         new_imanu = ItemToDBObject.toItemManufacturer(item)
         if not imanu:
             db.add(new_imanu)
@@ -99,7 +100,7 @@ class ItemRepository(IItemRepository):
 
     @classmethod
     def _to_items(cls, select_results):
-        dbtoitem = DBToItem(ItemFactory())
+        dbtoitem = DBToItem(itemfactory=ItemFactory(), jancodefactory=JanCodeFactory())
         results: list[Item] = []
         for r in select_results:
             item = dbtoitem.toItem(
@@ -112,7 +113,7 @@ class ItemRepository(IItemRepository):
             results.append(item)
         return results
 
-    async def find_by_jan_code(self, jan_code: str) -> list[Item]:
+    async def find_by_jan_code(self, jan_code: JanCode) -> list[Item]:
         db = self.session
         stmt = (
             select(ItemInventory, ItemName, ItemCategory, ItemManufacturer, ItemMemo)
@@ -121,7 +122,7 @@ class ItemRepository(IItemRepository):
             .join(ItemCategory, ItemInventory.jan_code == ItemCategory.jan_code)
             .join(ItemManufacturer, ItemInventory.jan_code == ItemManufacturer.jan_code)
             .join(ItemMemo, ItemInventory.id == ItemMemo.id)
-            .where(ItemInventory.jan_code == jan_code)
+            .where(ItemInventory.jan_code == jan_code.value)
             .order_by(ItemInventory.id.asc())
         )
         ret = await db.execute(stmt)
@@ -181,7 +182,7 @@ class JanCodeInfoRepository(IJanCodeInfoRepository):
 
     async def save(self, jancodeinfo: JanCodeInfo):
         db = self.session
-        iname: ItemName = await db.get(ItemName, jancodeinfo.jan_code)
+        iname: ItemName = await db.get(ItemName, jancodeinfo.jan_code.value)
         new_iname = JanCodeInfoToDBObject.toItemName(jancodeinfo)
         if not iname:
             db.add(new_iname)
@@ -193,7 +194,7 @@ class JanCodeInfoRepository(IJanCodeInfoRepository):
             await db.commit()
             await db.refresh(iname)
 
-        icate: ItemCategory = await db.get(ItemCategory, jancodeinfo.jan_code)
+        icate: ItemCategory = await db.get(ItemCategory, jancodeinfo.jan_code.value)
         new_icate = JanCodeInfoToDBObject.toItemCategory(jancodeinfo)
         if not icate:
             db.add(new_icate)
@@ -205,7 +206,9 @@ class JanCodeInfoRepository(IJanCodeInfoRepository):
             await db.commit()
             await db.refresh(icate)
 
-        imanu: ItemManufacturer = await db.get(ItemManufacturer, jancodeinfo.jan_code)
+        imanu: ItemManufacturer = await db.get(
+            ItemManufacturer, jancodeinfo.jan_code.value
+        )
         new_imanu = JanCodeInfoToDBObject.toItemManufacturer(jancodeinfo)
         if not imanu:
             db.add(new_imanu)
@@ -217,20 +220,22 @@ class JanCodeInfoRepository(IJanCodeInfoRepository):
             await db.commit()
             await db.refresh(imanu)
 
-    async def find_by_jan_code(self, jan_code: str) -> JanCodeInfo | None:
+    async def find_by_jan_code(self, jan_code: JanCode) -> JanCodeInfo | None:
         db = self.session
         stmt = (
             select(ItemName, ItemCategory, ItemManufacturer)
             .select_from(ItemName)
             .join(ItemCategory, ItemName.jan_code == ItemCategory.jan_code)
             .join(ItemManufacturer, ItemName.jan_code == ItemManufacturer.jan_code)
-            .where(ItemName.jan_code == jan_code)
+            .where(ItemName.jan_code == jan_code.value)
         )
         ret = await db.execute(stmt)
         one = ret.mappings().one_or_none()
         if not one:
             return None
-        jancodeinfo = DBToJanCodeInfo(JanCodeInfoFactory()).toJanCodeInfo(
+        jancodeinfo = DBToJanCodeInfo(
+            jancodeinfofactory=JanCodeInfoFactory(), jancodefactory=JanCodeFactory()
+        ).toJanCodeInfo(
             item_name=one[ItemName.__name__],
             item_category=one[ItemCategory.__name__],
             item_manufacturer=one[ItemManufacturer.__name__],

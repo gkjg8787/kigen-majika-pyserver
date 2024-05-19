@@ -61,7 +61,10 @@ class EditItemInitForm:
             return EditItemFormResult(
                 id=self.edititemgetform.id, error_msg=getoneresult.error_msg
             )
-        result = EditItemFormResult(**getoneresult.item.model_dump())
+        result = EditItemFormResult(
+            **getoneresult.item.model_dump(exclude={"jan_code"}),
+            jan_code=getoneresult.item.jan_code.value
+        )
         if result.expiry_date:
             result.expiry_date = sutil.utcTolocaltime(
                 result.expiry_date, tz=self.local_timezone
@@ -108,7 +111,9 @@ class EditItemForm:
             result.error_msg = "No Update"
             return result
         result = EditItemFormResult(
-            **itemupdateresult.item.model_dump(), is_next_page=True
+            **itemupdateresult.item.model_dump(exclude={"jan_code"}),
+            jan_code=itemupdateresult.item.jan_code.value,
+            is_next_page=True
         )
         if result.expiry_date:
             result.expiry_date = sutil.utcTolocaltime(

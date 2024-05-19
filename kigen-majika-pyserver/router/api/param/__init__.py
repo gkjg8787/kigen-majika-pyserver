@@ -5,7 +5,10 @@ from .items import (
     ItemDeleteParam,
     ItemRequestParam,
 )
-
+from .param_convert import (
+    ItemUpdateParamToDomain,
+    ItemToParam,
+)
 
 __all__ = [
     # JSON
@@ -14,4 +17,7 @@ __all__ = [
     "ItemCreateParam",
     "ItemDeleteParam",
     "ItemRequestParam",
+    # Service
+    "ItemUpdateParamToDomain",
+    "ItemToParam",
 ]

@@ -12,8 +12,8 @@ from router.html.usecase import (
 )
 from router.html.param import AddItemPostForm, AddJanCodePostForm
 from router.html.usecase.shared import htmlname
-from domain.models import JanCodeInfo
-from externalfacade.items import JanCodeInfoFactory
+from domain.models import JanCodeInfo, JanCode
+from externalfacade.items import JanCodeInfoFactory, JanCodeFactory
 from application.items import IJanCodeInfoCreator
 
 from . import shared
@@ -50,7 +50,7 @@ class DummyJanCodeInfoCreator(IJanCodeInfoCreator):
         else:
             self.updated_at = updated_at
 
-    async def create(self, jan_code: str) -> JanCodeInfo:
+    async def create(self, jan_code: JanCode) -> JanCodeInfo:
         return JanCodeInfoFactory.create(
             jan_code=jan_code,
             name=self.name,
@@ -66,13 +66,14 @@ class TestAddJanCodeForm:
         id = 1
         item = shared.get_item(id=id)
         name = "test"
-        addjancodepostform = AddJanCodePostForm(jan_code=item.jan_code)
+        addjancodepostform = AddJanCodePostForm(jan_code=item.jan_code.value)
         addjancodeformresult = await AddJanCodeForm(
             jancodeinfocreator=DummyJanCodeInfoCreator(name=name),
             addjancodepostform=addjancodepostform,
+            jancodefactory=JanCodeFactory(),
         ).execute()
         comparing_data = AddJanCodeFormResult(
-            is_next_page=False, name=name, jan_code=item.jan_code
+            is_next_page=False, name=name, jan_code=item.jan_code.value
         )
         assert comparing_data == addjancodeformresult
 
@@ -86,7 +87,7 @@ class TestAddItemForm:
         item = shared.get_item(id=id, name=name)
         additempostform = AddItemPostForm(
             name="",  # None here to go find the name
-            jan_code=item.jan_code,
+            jan_code=item.jan_code.value,
             inventory=item.inventory,
             place=item.place,
             category=item.category,
@@ -109,6 +110,6 @@ class TestAddItemForm:
             create_url=create_url,
         ).execute()
         comparing_data = AddItemFormResult(
-            is_next_page=True, name=name, jan_code=item.jan_code
+            is_next_page=True, name=name, jan_code=item.jan_code.value
         )
         assert comparing_data == additemformresult

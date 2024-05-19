@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from domain.models import Item
-from externalfacade.items import ItemFactory
+from externalfacade.items import ItemFactory, JanCodeFactory
 
 
 def get_item(
@@ -21,7 +21,7 @@ def get_item(
     return ItemFactory.create(
         id=id,
         name=name,
-        jan_code=str(id),
+        jan_code=JanCodeFactory.create(jan_code=str(id)),
         inventory=1,
         place="",
         category="",

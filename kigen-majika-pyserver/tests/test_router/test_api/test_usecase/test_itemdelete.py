@@ -4,7 +4,11 @@ import pytest
 
 from router.api.usecase import itemdelete
 from router.api.param import ItemDeleteParam
-from inmemory.items import ItemDictRepository, InMemoryItemFactory
+from inmemory.items import (
+    ItemDictRepository,
+    InMemoryItemFactory,
+    InMemoryJanCodeFactory,
+)
 from domain.models import Item
 
 
@@ -18,7 +22,7 @@ class TestItemDelete:
         item = InMemoryItemFactory.create(
             id=1,
             name="test",
-            jan_code="0123456789012",
+            jan_code=InMemoryJanCodeFactory.create("0123456789012"),
             inventory=1,
             place="台所",
             category="お菓子",
@@ -41,7 +45,7 @@ class TestItemDelete:
         item = InMemoryItemFactory.create(
             id=1,
             name="test",
-            jan_code="0123456789012",
+            jan_code=InMemoryJanCodeFactory.create("0123456789012"),
             inventory=1,
             place="台所",
             category="お菓子",

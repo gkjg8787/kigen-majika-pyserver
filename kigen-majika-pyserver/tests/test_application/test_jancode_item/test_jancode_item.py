@@ -7,8 +7,8 @@ from application.items.jancode_item import (
     JanCodeInfoData,
     OnlineJanCodeInfoCreator,
 )
-from domain.models import JanCodeInfo
-from externalfacade.items import JanCodeInfoFactory
+from domain.models import JanCodeInfo, JanCode
+from externalfacade.items import JanCodeInfoFactory, JanCodeFactory
 
 
 def assert_comparing_jancodeinfo(one: JanCodeInfo, two: JanCodeInfo):
@@ -28,7 +28,7 @@ class TestJanSyohinKensakuResult:
         with open(self.test_filename) as f:
             html = f.read()
         assert html != ""
-        jan_code = "4902121033850"
+        jan_code = JanCodeFactory.create(jan_code="4902121033850")
         parse_jancodeinfo = JanSyohinKensakuResult(html).toJanCodeInfo(
             jancodeinfodata=JanCodeInfoData(
                 jancodeinfofactory=JanCodeInfoFactory(), jan_code=jan_code
@@ -48,7 +48,7 @@ class TestJanSyohinKensakuResult:
         with open(self.test_filename_no_jancode) as f:
             html = f.read()
         assert html != ""
-        jan_code = "4"
+        jan_code = JanCodeFactory.create(jan_code="4")
         parse_jancodeinfo = JanSyohinKensakuResult(html).toJanCodeInfo(
             jancodeinfodata=JanCodeInfoData(
                 jancodeinfofactory=JanCodeInfoFactory(), jan_code=jan_code
@@ -68,7 +68,7 @@ class TestOnlineJanCodeInfoCreator:
 
     @pytest.mark.asyncio
     async def test_create(self, test_db):
-        jan_code = "4902121033850"
+        jan_code = JanCodeFactory.create(jan_code="4902121033850")
         get_jancodeinfo = await OnlineJanCodeInfoCreator(
             factory=JanCodeInfoFactory()
         ).create(jan_code)

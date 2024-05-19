@@ -1,5 +1,6 @@
 from domain.models import (
     Item,
+    JanCode,
     JanCodeInfo,
     IItemRepository,
     IJanCodeInfoRepository,
@@ -15,7 +16,7 @@ class ItemDictRepository(IItemRepository):
     async def save(self, item: Item):
         self.database[item.id] = item
 
-    async def find_by_jan_code(self, jan_code: str) -> list[Item]:
+    async def find_by_jan_code(self, jan_code: JanCode) -> list[Item]:
         results: list[Item] = []
         for v in self.database.values():
             if v.jan_code == jan_code:
@@ -42,7 +43,7 @@ class JanCodeInfoDictRepository(IJanCodeInfoRepository):
         self.database = data
 
     async def save(self, jancodeinfo: JanCodeInfo):
-        self.database[jancodeinfo.jan_code] = jancodeinfo
+        self.database[jancodeinfo.jan_code.value] = jancodeinfo
 
-    async def find_by_jan_code(self, jan_code: str) -> JanCodeInfo | None:
-        return self.database.get(jan_code, None)
+    async def find_by_jan_code(self, jan_code: JanCode) -> JanCodeInfo | None:
+        return self.database.get(jan_code.value, None)

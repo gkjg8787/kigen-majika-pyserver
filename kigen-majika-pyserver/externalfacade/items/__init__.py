@@ -2,11 +2,12 @@ from .items import ItemInventory, ItemName, ItemCategory, ItemMemo, ItemManufact
 from .itemqueryservice import ItemQueryService
 from .itemidentity import ItemIdentity
 from .repository import ItemRepository, JanCodeInfoRepository
-from .factory import ItemFactory, JanCodeInfoFactory
+from .factory import ItemFactory, JanCodeInfoFactory, JanCodeFactory
 
 __all__ = [
     # factory
     "ItemFactory",
+    "JanCodeFactory",
     "JanCodeInfoFactory",
     # DB model
     "ItemInventory",

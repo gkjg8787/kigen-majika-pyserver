@@ -2,7 +2,13 @@ from datetime import datetime, timezone
 
 from pydantic import BaseModel
 
-from domain.models import IItemRepository, Item, IItemFactory, IJanCodeInfoRepository
+from domain.models import (
+    IItemRepository,
+    Item,
+    IItemFactory,
+    IJanCodeInfoRepository,
+    IJanCodeFactory,
+)
 from domain.service import IItemIdentity
 from router.api.param import ItemCreateParam
 
@@ -16,6 +22,7 @@ class ItemCreate:
     itemrepository: IItemRepository
     itemidentity: IItemIdentity
     itemfactory: IItemFactory
+    jancodefactory: IJanCodeFactory
     jancodeinforepository: IJanCodeInfoRepository
 
     def __init__(
@@ -23,11 +30,13 @@ class ItemCreate:
         itemrepository: IItemRepository,
         itemidentity: IItemIdentity,
         itemfactory: IItemFactory,
+        jancodefactory: IJanCodeFactory,
         jancodeinforepository: IJanCodeInfoRepository,
     ):
         self.itemrepository = itemrepository
         self.itemidentity = itemidentity
         self.itemfactory = itemfactory
+        self.jancodefactory = jancodefactory
         self.jancodeinforepository = jancodeinforepository
 
     async def create(self, itemcreateparam: ItemCreateParam) -> ItemCreateResult:
@@ -43,7 +52,7 @@ class ItemCreate:
         item = self.itemfactory.create(
             id=int(nextid_str),
             name=itemcreateparam.name,
-            jan_code=itemcreateparam.jan_code,
+            jan_code=self.jancodefactory.create(jan_code=itemcreateparam.jan_code),
             inventory=itemcreateparam.inventory,
             place=itemcreateparam.place,
             category=itemcreateparam.category,
@@ -71,7 +80,7 @@ class ItemCreate:
         if not self.is_get_jancodeinfo(itemcreateparam=itemcreateparam):
             return itemcreateparam
         jancodeinfo = await self.jancodeinforepository.find_by_jan_code(
-            jan_code=itemcreateparam.jan_code
+            jan_code=self.jancodefactory.create(jan_code=itemcreateparam.jan_code)
         )
         result = ItemCreateParam(**itemcreateparam.model_dump())
         if not jancodeinfo:

@@ -24,7 +24,7 @@ from .usecase import (
 )
 from application.items.connect_api import ConnectToAPIJanCodeInfoCreator
 from .usecase.shared import util as s_util
-from externalfacade.items import JanCodeInfoFactory
+from externalfacade.items import JanCodeInfoFactory, JanCodeFactory
 
 router = APIRouter(prefix="/items", tags=["items"])
 templates = Jinja2Templates(directory="templates")
@@ -79,6 +79,7 @@ async def read_users_items_add(
             factory=JanCodeInfoFactory(),
         ),
         addjancodepostform=addjancodeinfopostform,
+        jancodefactory=JanCodeFactory(),
     ).execute()
     context = result.get_context()
     return templates.TemplateResponse(

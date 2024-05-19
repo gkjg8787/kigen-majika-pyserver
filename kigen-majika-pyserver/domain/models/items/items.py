@@ -4,8 +4,23 @@ from enum import Enum
 from pydantic import BaseModel, field_validator
 
 
+class JanCode(BaseModel):
+    value: str
+
+    @field_validator("value")
+    @classmethod
+    def to_half_width_str(cls, v):
+        try:
+            vv = int(v)
+        except ValueError as err:
+            raise ValueError("cannot convert to int")
+        if vv < 0:
+            raise ValueError("less than 0")
+        return str(vv).zfill(len(v))
+
+
 class JanCodeInfo(BaseModel):
-    jan_code: str
+    jan_code: JanCode
     name: str
     category: str
     manufacturer: str
@@ -15,7 +30,7 @@ class JanCodeInfo(BaseModel):
 class Item(BaseModel):
     id: int
     name: str = ""
-    jan_code: str
+    jan_code: JanCode
     inventory: int = 0
     place: str = ""
     category: str = ""

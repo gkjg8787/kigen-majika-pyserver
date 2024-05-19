@@ -9,6 +9,7 @@ from inmemory.items import (
     ItemDictRepository,
     ItemDictIdentity,
     JanCodeInfoDictRepository,
+    InMemoryJanCodeFactory,
 )
 from .shared import ItemComparingData
 
@@ -23,6 +24,7 @@ class TestItemCreate:
             itemrepository=ItemDictRepository(data=database),
             itemfactory=InMemoryItemFactory(),
             itemidentity=ItemDictIdentity(data=database),
+            jancodefactory=InMemoryJanCodeFactory(),
             jancodeinforepository=JanCodeInfoDictRepository(data=jancodeinfo_database),
         ).create(itemcreateparam=icp)
 
@@ -44,7 +46,7 @@ class TestItemCreate:
         item = InMemoryItemFactory.create(
             id=1,
             name=name,
-            jan_code=jan_code,
+            jan_code=InMemoryJanCodeFactory.create(jan_code=jan_code),
             inventory=inventory,
             place=place,
             category=category,
@@ -55,6 +57,14 @@ class TestItemCreate:
             updated_at=now,
         )
         return ItemComparingData(**item.model_dump())
+
+    def itemupdateparamToItemComparingData(
+        self, itemupdatecreate: ItemCreateParam
+    ) -> ItemComparingData:
+        return ItemComparingData(
+            **itemupdatecreate.model_dump(exclude={"jan_code"}),
+            jan_code=InMemoryJanCodeFactory.create(jan_code=itemupdatecreate.jan_code)
+        )
 
     @pytest.mark.asyncio
     async def test_create_all_param(self, test_db):
@@ -69,7 +79,9 @@ class TestItemCreate:
             expiry_date=datetime(2024, 11, 30, 0, 0, 0),
         )
         await self.create_item_and_assert(
-            icp=icp, error_msg="", correct_item=ItemComparingData(**icp.model_dump())
+            icp=icp,
+            error_msg="",
+            correct_item=self.itemupdateparamToItemComparingData(itemupdatecreate=icp),
         )
 
     @pytest.mark.asyncio

@@ -7,6 +7,7 @@ from .shared import htmlcontext, htmlname
 from router.html.param import AddItemPostForm, AddJanCodePostForm
 from router.api.usecase import ItemCreateResult, JanCodeInfoResult
 from application.items import IJanCodeInfoCreator
+from domain.models import IJanCodeFactory
 
 
 class AddItemFormResult(htmlcontext.HtmlContext):
@@ -40,21 +41,26 @@ class AddJanCodeFormResult(AddItemFormResult):
 class AddJanCodeForm:
     jancodeinfocreator: IJanCodeInfoCreator
     addjancodepostform: AddJanCodePostForm
+    jancodefactory: IJanCodeFactory
 
     def __init__(
         self,
         jancodeinfocreator: IJanCodeInfoCreator,
         addjancodepostform: AddJanCodePostForm,
+        jancodefactory: IJanCodeFactory,
     ):
         self.jancodeinfocreator = jancodeinfocreator
         self.addjancodepostform = addjancodepostform
+        self.jancodefactory = jancodefactory
 
     async def execute(self) -> AddJanCodeFormResult:
         addjancodepostform: AddJanCodePostForm = self.addjancodepostform
-        res = await self.jancodeinfocreator.create(jan_code=addjancodepostform.jan_code)
+        res = await self.jancodeinfocreator.create(
+            jan_code=self.jancodefactory.create(jan_code=addjancodepostform.jan_code)
+        )
         return AddJanCodeFormResult(
             is_next_page=False,
-            jan_code=res.jan_code,
+            jan_code=res.jan_code.value,
             name=res.name,
             category=res.category,
             manufacturer=res.manufacturer,
@@ -104,4 +110,8 @@ class AddItemForm:
                         jan_code=additempostform.jan_code,
                         error_msg=icr.error_msg,
                     )
-            return AddItemFormResult(is_next_page=True, **icr.item.model_dump())
+            return AddItemFormResult(
+                is_next_page=True,
+                **icr.item.model_dump(exclude={"jan_code"}),
+                jan_code=icr.item.jan_code.value
+            )

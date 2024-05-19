@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 
 from externalfacade.items import dbconvert
-from externalfacade.items import ItemFactory
+from externalfacade.items import ItemFactory, JanCodeFactory
 from externalfacade import (
     ItemInventory,
     ItemCategory,
@@ -38,7 +38,7 @@ class TestItemToDBObject:
         return ItemFactory.create(
             id=id,
             name=name,
-            jan_code=jan_code,
+            jan_code=JanCodeFactory.create(jan_code=jan_code),
             inventory=inventory,
             place=place,
             category=category,

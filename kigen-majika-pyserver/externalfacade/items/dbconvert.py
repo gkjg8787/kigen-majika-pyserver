@@ -5,7 +5,13 @@ from .items import (
     ItemName,
     ItemManufacturer,
 )
-from domain.models import IItemFactory, Item, JanCodeInfo, IJanCodeInfoFactory
+from domain.models import (
+    IItemFactory,
+    Item,
+    JanCodeInfo,
+    IJanCodeInfoFactory,
+    IJanCodeFactory,
+)
 
 
 class ItemToDBObject:
@@ -13,7 +19,7 @@ class ItemToDBObject:
     def toItemInventory(cls, item: Item) -> ItemInventory:
         return ItemInventory(
             id=item.id,
-            jan_code=item.jan_code,
+            jan_code=item.jan_code.value,
             inventory=item.inventory,
             place=item.place,
             expiry_date=item.expiry_date,
@@ -24,13 +30,15 @@ class ItemToDBObject:
     @classmethod
     def toItemName(cls, item: Item) -> ItemName:
         return ItemName(
-            jan_code=item.jan_code, name=item.name, updated_at=item.updated_at
+            jan_code=item.jan_code.value, name=item.name, updated_at=item.updated_at
         )
 
     @classmethod
     def toItemCategory(cls, item: Item) -> ItemCategory:
         return ItemCategory(
-            jan_code=item.jan_code, category=item.category, updated_at=item.updated_at
+            jan_code=item.jan_code.value,
+            category=item.category,
+            updated_at=item.updated_at,
         )
 
     @classmethod
@@ -40,7 +48,7 @@ class ItemToDBObject:
     @classmethod
     def toItemManufacturer(cls, item: Item) -> ItemManufacturer:
         return ItemManufacturer(
-            jan_code=item.jan_code,
+            jan_code=item.jan_code.value,
             manufacturer=item.manufacturer,
             updated_at=item.updated_at,
         )
@@ -50,7 +58,7 @@ class JanCodeInfoToDBObject:
     @classmethod
     def toItemName(cls, jancodeinfo: JanCodeInfo) -> ItemName:
         return ItemName(
-            jan_code=jancodeinfo.jan_code,
+            jan_code=jancodeinfo.jan_code.value,
             name=jancodeinfo.name,
             updated_at=jancodeinfo.updated_at,
         )
@@ -58,7 +66,7 @@ class JanCodeInfoToDBObject:
     @classmethod
     def toItemCategory(cls, jancodeinfo: JanCodeInfo) -> ItemCategory:
         return ItemCategory(
-            jan_code=jancodeinfo.jan_code,
+            jan_code=jancodeinfo.jan_code.value,
             category=jancodeinfo.category,
             updated_at=jancodeinfo.updated_at,
         )
@@ -66,17 +74,19 @@ class JanCodeInfoToDBObject:
     @classmethod
     def toItemManufacturer(cls, jancodeinfo: JanCodeInfo) -> ItemManufacturer:
         return ItemManufacturer(
-            jan_code=jancodeinfo.jan_code,
+            jan_code=jancodeinfo.jan_code.value,
             manufacturer=jancodeinfo.manufacturer,
             updated_at=jancodeinfo.updated_at,
         )
 
 
 class DBToItem:
-    factory: IItemFactory
+    itemfactory: IItemFactory
+    jancodefactory: IJanCodeFactory
 
-    def __init__(self, factory: IItemFactory):
-        self.factory = factory
+    def __init__(self, itemfactory: IItemFactory, jancodefactory: IJanCodeFactory):
+        self.itemfactory = itemfactory
+        self.jancodefactory = jancodefactory
 
     def toItem(
         self,
@@ -86,10 +96,10 @@ class DBToItem:
         item_memo: ItemMemo,
         item_manufacturer: ItemManufacturer,
     ) -> Item:
-        return self.factory.create(
+        return self.itemfactory.create(
             id=item_inventory.id,
             name=item_name.name,
-            jan_code=item_inventory.jan_code,
+            jan_code=self.jancodefactory.create(jan_code=item_inventory.jan_code),
             inventory=item_inventory.inventory,
             place=item_inventory.place,
             category=item_category.category,
@@ -103,9 +113,13 @@ class DBToItem:
 
 class DBToJanCodeInfo:
     jancodeinfofactory: IJanCodeInfoFactory
+    jancodefactory: IJanCodeFactory
 
-    def __init__(self, factory: IJanCodeInfoFactory):
-        self.jancodeinfofactory = factory
+    def __init__(
+        self, jancodeinfofactory: IJanCodeInfoFactory, jancodefactory: IJanCodeFactory
+    ):
+        self.jancodeinfofactory = jancodeinfofactory
+        self.jancodefactory = jancodefactory
 
     def toJanCodeInfo(
         self,
@@ -121,7 +135,7 @@ class DBToJanCodeInfo:
         if item_manufacturer.updated_at:
             updl.append(item_manufacturer.updated_at)
         return self.jancodeinfofactory.create(
-            jan_code=item_name.jan_code,
+            jan_code=self.jancodefactory.create(jan_code=item_name.jan_code),
             name=item_name.name,
             category=item_category.category,
             manufacturer=item_manufacturer.manufacturer,

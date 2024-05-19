@@ -1,6 +1,13 @@
 from datetime import datetime
 
-from domain.models import IItemFactory, IJanCodeInfoFactory, Item, JanCodeInfo
+from domain.models import (
+    IItemFactory,
+    IJanCodeInfoFactory,
+    Item,
+    JanCodeInfo,
+    JanCode,
+    IJanCodeFactory,
+)
 
 
 class InMemoryItemFactory(IItemFactory):
@@ -9,7 +16,7 @@ class InMemoryItemFactory(IItemFactory):
         cls,
         id: int,
         name: str,
-        jan_code: str,
+        jan_code: JanCode,
         inventory: int,
         place: str,
         category: str,
@@ -46,11 +53,17 @@ class InMemoryItemFactory(IItemFactory):
         )
 
 
+class InMemoryJanCodeFactory(IJanCodeFactory):
+    @classmethod
+    def create(cls, jan_code: str) -> JanCode:
+        return JanCode(value=jan_code)
+
+
 class InMemoryJanCodeInfoFactory(IJanCodeInfoFactory):
     @classmethod
     def create(
         cls,
-        jan_code: str,
+        jan_code: JanCode,
         name: str,
         category: str,
         manufacturer: str,

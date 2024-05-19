@@ -41,7 +41,9 @@ class TestEditItemInitForm:
             detail_api_url="dummy",
             local_timezone=sutil.JST,
         ).execute()
-        comparing_data = EditItemFormResult(**item.model_dump())
+        comparing_data = EditItemFormResult(
+            **item.model_dump(exclude={"jan_code"}), jan_code=item.jan_code.value
+        )
         assert result == comparing_data
 
     @pytest.mark.asyncio
@@ -136,6 +138,8 @@ class TestEditItemForm:
             local_timezone=sutil.JST,
         ).execute()
         comparing_data = EditItemFormResult(
-            is_next_page=True, **itemupdateresult.item.model_dump()
+            is_next_page=True,
+            **itemupdateresult.item.model_dump(exclude={"jan_code"}),
+            jan_code=itemupdateresult.item.jan_code.value,
         )
         assert result == comparing_data

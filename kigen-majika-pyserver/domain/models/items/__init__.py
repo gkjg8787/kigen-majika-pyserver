@@ -1,5 +1,6 @@
 from .items import (
     Item,
+    JanCode,
     JanCodeInfo,
     ItemSort,
     ItemStockFilter,
@@ -7,6 +8,7 @@ from .items import (
 )
 from .factory import (
     IItemFactory,
+    IJanCodeFactory,
     IJanCodeInfoFactory,
 )
 from .repository import (
@@ -17,9 +19,11 @@ from .repository import (
 __all__ = [
     # domain
     "Item",
+    "JanCode",
     "JanCodeInfo",
     # interface
     "IItemFactory",
+    "IJanCodeFactory",
     "IJanCodeInfoFactory",
     "IItemRepository",
     "IJanCodeInfoRepository",

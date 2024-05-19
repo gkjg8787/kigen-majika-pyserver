@@ -47,7 +47,9 @@ class TestDeleteItemInitForm:
             detail_api_url="dummy",
             local_timezone=sutil.JST,
         ).execute()
-        comparing_data = DeleteItemFormResult(**item.model_dump())
+        comparing_data = DeleteItemFormResult(
+            **item.model_dump(exclude={"jan_code"}), jan_code=item.jan_code.value
+        )
         assert result == comparing_data
 
 

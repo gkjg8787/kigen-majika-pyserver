@@ -354,7 +354,7 @@ class TestItemQuerySerice:
     @pytest.mark.asyncio
     async def test_find_all_keyword_search_jancode(self, test_db):
         def get_comparing_items(items: list[Item]):
-            return [i for i in items if str(2).zfill(13) in i.jan_code]
+            return [i for i in items if str(2).zfill(13) in i.jan_code.value]
 
         itemlist: list[Item] = self.get_items_for_keyword_search()
         async for db in test_db:

@@ -118,6 +118,8 @@ class ItemListInHTMLResultFactory:
             hidden_input_dict["stock"] = itemlistgetform.stock
         if itemlistgetform.stype:
             hidden_input_dict["stype"] = itemlistgetform.stype
+        if itemlistgetform.word:
+            hidden_input_dict["word"] = itemlistgetform.word
         viewitems: list[ViewItem] = []
         if items:
             viewitems = cls.create_viewitems(items=items, tz=local_timezone)

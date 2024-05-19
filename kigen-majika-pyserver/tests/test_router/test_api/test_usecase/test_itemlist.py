@@ -4,7 +4,12 @@ import pytest
 
 from router.api.usecase import ItemList, ItemOne
 from router.api.param import ItemRequestParam, ItemListRequestParam
-from inmemory.items import ItemDictRepository, ItemQueryDictService, InMemoryItemFactory
+from inmemory.items import (
+    ItemDictRepository,
+    ItemQueryDictService,
+    InMemoryItemFactory,
+    InMemoryJanCodeFactory,
+)
 from domain.models import Item
 from .shared import ItemComparingData
 
@@ -15,7 +20,7 @@ def get_item(id: int):
     return InMemoryItemFactory.create(
         id=id,
         name=f"test{id}",
-        jan_code=str(id),
+        jan_code=InMemoryJanCodeFactory.create(jan_code=str(id)),
         inventory=1,
         place="other",
         category="category",

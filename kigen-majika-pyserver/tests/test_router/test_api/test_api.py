@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from main import app
-from externalfacade.items import ItemFactory, JanCodeInfoFactory
+from externalfacade.items import ItemFactory, JanCodeInfoFactory, JanCodeFactory
 from router.api.param import (
     ItemCreateParam,
     ItemUpdateParam,
@@ -44,7 +44,7 @@ def create_item(id: int, expiry_date: datetime | None = None):
     return ItemFactory.create(
         id=id,
         name=name,
-        jan_code=jan_code,
+        jan_code=JanCodeFactory.create(jan_code=jan_code),
         inventory=1,
         place="other",
         category="not category",
@@ -122,7 +122,7 @@ async def test_read_api_item_jancodeinfo_get_data(test_db, mocker):
     manufacturer = "maker"
     updated_at = datetime.now(timezone.utc)
     jancodeinfo = JanCodeInfoFactory.create(
-        jan_code=jan_code,
+        jan_code=JanCodeFactory.create(jan_code=jan_code),
         name=name,
         category=category,
         manufacturer=manufacturer,
@@ -157,7 +157,8 @@ async def test_read_api_item_create(test_db, mocker):
     now = datetime.now(timezone.utc)
     item = ItemFactory.create(
         id=1,
-        **icp.model_dump(),
+        **icp.model_dump(exclude={"jan_code"}),
+        jan_code=JanCodeFactory.create(jan_code=icp.jan_code),
         created_at=now,
         updated_at=now,
     )
@@ -188,7 +189,8 @@ async def test_read_api_item_update(test_db, mocker):
     )
     now = datetime.now(timezone.utc)
     item = ItemFactory.create(
-        **iup.model_dump(),
+        **iup.model_dump(exclude={"jan_code"}),
+        jan_code=JanCodeFactory.create(jan_code=iup.jan_code),
         created_at=now,
         updated_at=now,
     )

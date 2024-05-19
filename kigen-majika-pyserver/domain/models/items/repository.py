@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from .items import Item, JanCodeInfo
+from .items import Item, JanCodeInfo, JanCode
 
 
 class IItemRepository(metaclass=ABCMeta):
@@ -9,7 +9,7 @@ class IItemRepository(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def find_by_jan_code(self, jan_code: str) -> list[Item]:
+    async def find_by_jan_code(self, jan_code: JanCode) -> list[Item]:
         pass
 
     @abstractmethod
@@ -31,5 +31,5 @@ class IJanCodeInfoRepository(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def find_by_jan_code(self, jan_code: str) -> JanCodeInfo | None:
+    async def find_by_jan_code(self, jan_code: JanCode) -> JanCodeInfo | None:
         pass

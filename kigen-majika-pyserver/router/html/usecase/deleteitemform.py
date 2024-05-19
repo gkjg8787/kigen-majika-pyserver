@@ -55,7 +55,10 @@ class DeleteItemInitForm:
             return DeleteItemFormResult(
                 id=self.deleteitempostform.id, error_msg=getoneresult.error_msg
             )
-        result = DeleteItemFormResult(**getoneresult.item.model_dump())
+        result = DeleteItemFormResult(
+            **getoneresult.item.model_dump(exclude={"jan_code"}),
+            jan_code=getoneresult.item.jan_code.value
+        )
         if result.expiry_date:
             result.expiry_date = sutil.utcTolocaltime(
                 result.expiry_date, tz=self.local_timezone
