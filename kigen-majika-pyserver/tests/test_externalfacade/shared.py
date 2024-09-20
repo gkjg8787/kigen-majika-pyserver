@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from domain.models import Item, JanCodeInfo
-from externalfacade.items import ItemFactory, JanCodeInfoFactory
+from externalfacade.items import ItemFactory, JanCodeInfoFactory, JanCodeFactory
 
 
 def get_item(
@@ -22,10 +22,11 @@ def get_item(
         created_at = now
     if updated_at is None:
         updated_at = now
+    jan_code_domain = JanCodeFactory.create(jan_code=jan_code)
     return ItemFactory.create(
         id=id,
         name=name,
-        jan_code=jan_code,
+        jan_code=jan_code_domain,
         inventory=inventory,
         place=place,
         category=category,
@@ -46,8 +47,9 @@ def get_jancodeinfo(
 ) -> JanCodeInfo:
     if not updated_at:
         updated_at = datetime.now(timezone.utc)
+    jan_code_domain = JanCodeFactory.create(jan_code=jan_code)
     return JanCodeInfoFactory.create(
-        jan_code=jan_code,
+        jan_code=jan_code_domain,
         name=name,
         category=category,
         manufacturer=manufacturer,

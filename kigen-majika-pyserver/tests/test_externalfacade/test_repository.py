@@ -22,12 +22,12 @@ from . import shared
 class TestItemRepository:
 
     async def assert_comparing_item(self, db, item: Item):
-        iname: ItemName = await db.get(ItemName, item.jan_code)
+        iname: ItemName = await db.get(ItemName, item.jan_code.value)
         iinv: ItemInventory = await db.get(ItemInventory, item.id)
-        icate: ItemCategory = await db.get(ItemCategory, item.jan_code)
-        imanu: ItemManufacturer = await db.get(ItemManufacturer, item.jan_code)
+        icate: ItemCategory = await db.get(ItemCategory, item.jan_code.value)
+        imanu: ItemManufacturer = await db.get(ItemManufacturer, item.jan_code.value)
         imemo: ItemMemo = await db.get(ItemMemo, item.id)
-        assert iname.jan_code == item.jan_code
+        assert iname.jan_code == item.jan_code.value
         assert iname.name == item.name
 
         assert iinv.id == item.id
@@ -41,10 +41,10 @@ class TestItemRepository:
         else:
             assert iinv.expiry_date == item.expiry_date
 
-        assert icate.jan_code == item.jan_code
+        assert icate.jan_code == item.jan_code.value
         assert icate.category == item.category
 
-        assert imanu.jan_code == item.jan_code
+        assert imanu.jan_code == item.jan_code.value
         assert imanu.manufacturer == item.manufacturer
 
         assert imemo.id == item.id
