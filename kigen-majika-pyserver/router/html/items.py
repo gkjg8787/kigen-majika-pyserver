@@ -12,6 +12,7 @@ from .param import (
     EditItemGetForm,
     EditItemPostForm,
     DeleteItemPostForm,
+    DeleteItemBulkPostForm,
 )
 from .usecase import (
     AddItemFormResult,
@@ -22,6 +23,7 @@ from .usecase import (
     EditItemForm,
     DeleteItemInitForm,
     DeleteItemForm,
+    DeleteItemBulkForm,
 )
 from application.items.connect_api import ConnectToAPIJanCodeInfoCreator
 from .usecase.shared import util as s_util
@@ -53,6 +55,37 @@ async def read_users_items(
         request=request, name="users/itemlist.html", context=result.get_context()
     )
     return ret
+
+
+@router.get("/delete_bulk", response_class=HTMLResponse)
+async def read_users_items_delete_bulk(
+    request: Request, itemlistgetform: ItemListGetForm = Depends()
+):
+    result = await ItemListInHTML(
+        api_url=str(request.url_for("read_api_items")),
+        local_timezone=s_util.JST,
+        itemlistgetform=itemlistgetform,
+    ).execute()
+    ret = templates.TemplateResponse(
+        request=request,
+        name="users/delete_items_bulk.html",
+        context=result.get_context(),
+    )
+    return ret
+
+
+@router.post("/delete_bulk/result", response_class=HTMLResponse)
+async def read_users_items_delete_bulk_result(
+    request: Request, deleteitembulkpostform: DeleteItemBulkPostForm = Depends()
+):
+    await DeleteItemBulkForm(
+        deleteitembulkpostform=deleteitembulkpostform,
+        delete_api_url=str(request.url_for("delete_api_items_bulk")),
+    ).execute()
+    return RedirectResponse(
+        url=request.url_for("read_users_items_delete_bulk"),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 
 @router.get("/readjancode", response_class=HTMLResponse)

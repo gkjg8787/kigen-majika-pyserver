@@ -1,0 +1,123 @@
+{% extends "shared/base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}" type="text/css">
+    <title>アイテム一括削除</title>
+    <script>
+        function confirmDelete() {
+            const checkboxes = document.querySelectorAll('input[name="delete_item_ids"]:checked');
+            if (checkboxes.length === 0) {
+                alert('削除するアイテムを選択してください。');
+                return false;
+            }
+            return confirm('選択したアイテムを本当に削除しますか？');
+        }
+        function scrollToTop() {
+            window.scrollTo(0, 0);
+        }
+        function scrollToBottom() {
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
+{% endblock %}
+
+{% block body %}
+    <a id="top"></a>
+    <h1>アイテム一括削除</h1>
+    <h2>操作メニュー</h2>
+    <p><a href="{{ url_for('read_users_items') }}" class="like_button_link">アイテム一覧に戻る</a></p>
+    <h3>フィルタ</h3>
+    <p>
+        {%- with
+            FORM_METHOD = inventory_filter.form.method,
+            FORM_ACTION = inventory_filter.form.action,
+            MENU_TITLE = inventory_filter.select.title,
+            MENU_NAME = inventory_filter.select.input_name,
+            menu_list = inventory_filter.select.menu_list,
+            hidden_input_dict = hidden_input_dict
+        %}
+        {%- include "shared/pulldown_menu_filter.html" %}
+        {%- endwith %}
+    </p>
+    <p>
+        {%- with
+            FORM_METHOD = sort_order.form.method,
+            FORM_ACTION = sort_order.form.action,
+            MENU_TITLE = sort_order.select.title,
+            MENU_NAME = sort_order.select.input_name,
+            menu_list = sort_order.select.menu_list,
+            hidden_input_dict = hidden_input_dict
+        %}
+        {%- include "shared/pulldown_menu_sort.html" %}
+        {%- endwith %}
+    </p>
+    <p>
+        {%- with
+            FORM_METHOD = search_filter.form.method,
+            FORM_ACTION = search_filter.form.action,
+            MENU_TITLE = search_filter.select.title,
+            MENU_NAME = search_filter.select.input_name,
+            menu_list = search_filter.select.menu_list,
+            INPUT_TEXT_NAME = search_filter.inputtext.name,
+            INPUT_TEXT_VALUE = search_filter.inputtext.value,
+            hidden_input_dict = hidden_input_dict
+        %}
+        {%- include "shared/keyword_search_filter.html" %}
+        {%- endwith %}
+    </p>
+    <p><a href="{{ url_for('read_users_items_delete_bulk') }}" class="plain-link">フィルタクリア</a></p>
+    <p><button type="button" onclick="scrollToBottom()" class="like_button">一番下へ</button></p>
+    <p>
+        件数
+        {{ items_length }}件
+    </p>
+    <form action="{{ url_for('read_users_items_delete_bulk_result') }}" method="post" onsubmit="return confirmDelete();">
+        <table class="item_list_table">
+            <tr>
+                <th>削除</th>
+                <th>id</th>
+                <th>商品名</th>
+                <th>JANコード</th>
+                <th>在庫数</th>
+                <th>カテゴリー</th>
+                <th>メーカー</th>
+                <th>保管場所</th>
+                <th>消費期限</th>
+                <th>注意度</th>
+                <th>備考</th>
+                <th>更新日</th>
+                <th>登録日</th>
+            </tr>
+            {%- for row in items %}
+            <tr>
+                <td><input type="checkbox" name="delete_item_ids" value="{{ row['id'] }}"></td>
+                <td>{{ row["id"] }}</td>
+                <td>{{row["name"]}}</td>
+                <td>{{row["jan_code"]["value"]}}</td>
+                <td>{{row["inventory"]}}</td>
+                <td>{{row["category"]}}</td>
+                <td>{{row["manufacturer"]}}</td>
+                <td>{{row["place"]}}</td>
+                <td>{{row["expiry_date"] | toLocalExpiryDateTextFormat }}</td>
+                <td>
+                    {%- if row["days_to_deadline"] | is_expired %}
+                    <span class="purple_text">危険</span>
+                    {%- elif row["days_to_deadline"] | is_caution %}
+                    <span class="red_text">注意</span>
+                    {%- elif row["days_to_deadline"] | is_somewhat_caution %}
+                    <span class="sandybrown_text">やや注意</span>
+                    {%- else %}
+                    <span>ー</span>
+                    {%- endif %}
+                </td>
+                <td>{{row["text"]}}</td>
+                <td>{{row["updated_at"] | toLocalTextFormat }}</td>
+                <td>{{row["created_at"] | toLocalTextFormat }}</td>
+            </tr>
+            {%- endfor %}
+        </table>
+        <p><button type="submit" class="like_button_link">はまとめて削除</button></p>
+    </form>
+    <p><button type="button" onclick="scrollToTop()" class="like_button">一番上へ</button></p>
+    <a id="bottom"></a>
+{% endblock %}

@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from domain.models import (
     Item,
@@ -171,6 +171,16 @@ class ItemRepository(IItemRepository):
         ret_obj = ret_objs[0]
         await db.delete(ret_obj[ItemMemo.__name__])
         await db.delete(ret_obj[ItemInventory.__name__])
+        await db.commit()
+
+    async def delete_by_ids(self, ids: list[int]) -> None:
+        db = self.session
+        if not ids:
+            return
+        stmt_memo = delete(ItemMemo).where(ItemMemo.id.in_(ids))
+        await db.execute(stmt_memo)
+        stmt_inventory = delete(ItemInventory).where(ItemInventory.id.in_(ids))
+        await db.execute(stmt_inventory)
         await db.commit()
 
 

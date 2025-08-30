@@ -24,6 +24,10 @@ class IItemRepository(metaclass=ABCMeta):
     async def delete_by_id(self, id: int) -> None:
         pass
 
+    @abstractmethod
+    async def delete_by_ids(self, ids: list[int]) -> None:
+        pass
+
 
 class IJanCodeInfoRepository(metaclass=ABCMeta):
     @abstractmethod

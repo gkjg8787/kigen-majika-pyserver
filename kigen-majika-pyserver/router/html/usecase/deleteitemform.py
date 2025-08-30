@@ -9,7 +9,7 @@ from .shared.readitemform import (
     GetOneItemCommand,
 )
 from router.api.usecase import ItemDeleteResult
-from router.html.param import DeleteItemPostForm
+from router.html.param import DeleteItemPostForm, DeleteItemBulkPostForm
 
 
 class DeleteItemFormResult(htmlcontext.HtmlContext):
@@ -70,6 +70,28 @@ class DeleteItemInitForm:
             input_date=result.updated_at, tz=self.local_timezone
         )
         return result
+
+
+class DeleteItemBulkForm:
+    deleteitembulkpostform: DeleteItemBulkPostForm
+    delete_api_url: str
+
+    def __init__(
+        self,
+        deleteitembulkpostform: DeleteItemBulkPostForm,
+        delete_api_url: str,
+    ):
+        self.deleteitembulkpostform = deleteitembulkpostform
+        self.delete_api_url = delete_api_url
+
+    async def execute(self) -> None:
+        async with httpx.AsyncClient() as client:
+            request_body = {"ids": self.deleteitembulkpostform.delete_item_ids}
+            res = await client.post(
+                self.delete_api_url,
+                json=request_body,
+            )
+            res.raise_for_status()
 
 
 class DeleteItemForm:

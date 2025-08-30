@@ -53,3 +53,7 @@ class ItemUpdateParam(BaseModel):
 
 class ItemDeleteParam(BaseModel):
     id: int
+
+
+class ItemListDelete(BaseModel):
+    ids: list[int]

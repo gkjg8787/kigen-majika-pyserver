@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+from typing import List
 
 from fastapi import Form
 
@@ -163,3 +164,10 @@ class DeleteItemPostForm(BaseModel):
             super().__init__(id=int(id), name=name)
         else:
             ValueError("id is not int")
+
+
+class DeleteItemBulkPostForm(BaseModel):
+    delete_item_ids: List[int]
+
+    def __init__(self, delete_item_ids: List[int] = Form(...)):
+        super().__init__(delete_item_ids=delete_item_ids)

@@ -32,8 +32,13 @@ class ItemDictRepository(IItemRepository):
     async def delete_by_id(self, id: int) -> None:
         if id not in self.database:
             return None
-        item = self.database.pop(id)
+        self.database.pop(id)
         return
+
+    async def delete_by_ids(self, ids: list[int]) -> None:
+        for id in ids:
+            if id in self.database:
+                self.database.pop(id)
 
 
 class JanCodeInfoDictRepository(IJanCodeInfoRepository):

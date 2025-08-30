@@ -21,6 +21,7 @@ from .usecase import (
     ItemCreate,
     ItemUpdate,
     ItemDelete,
+    ItemBulkDelete,
     ItemListResult,
     JanCodeInfoResult,
     ItemCreateResult,
@@ -32,6 +33,7 @@ from .param import (
     ItemUpdateParam,
     ItemCreateParam,
     ItemDeleteParam,
+    ItemListDelete,
     ItemRequestParam,
 )
 
@@ -117,3 +119,15 @@ async def read_api_item_delete(
         itemdeleteparam=itemdeleteparam
     )
     return itemdeleteresult
+
+
+@router.post("/items/bulk_delete", response_model=ItemDeleteResult)
+async def delete_api_items_bulk(
+    request: Request,
+    itemlistdelete: ItemListDelete,
+    db: AsyncSession = Depends(get_async_session),
+):
+    result = await ItemBulkDelete(itemrepository=ItemRepository(db)).delete(
+        itemlistdelete=itemlistdelete
+    )
+    return result
