@@ -1,7 +1,7 @@
 from .itemlist import ItemList, ItemListResult, ItemOne
 from .itemcreate import ItemCreate, ItemCreateResult
 from .itemupdate import ItemUpdate, ItemUpdateResult
-from .itemdelete import ItemDelete, ItemDeleteResult
+from .itemdelete import ItemDelete, ItemDeleteResult, ItemBulkDelete
 from .item_jancodeinfo import GetOnlineJanCodeInfo, GetJanCodeInfo, JanCodeInfoResult
 
 __all__ = [
@@ -17,4 +17,5 @@ __all__ = [
     "ItemUpdateResult",
     "ItemDelete",
     "ItemDeleteResult",
+    "ItemBulkDelete",
 ]

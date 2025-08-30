@@ -5,6 +5,7 @@ from .items import (
     EditItemGetForm,
     EditItemPostForm,
     DeleteItemPostForm,
+    DeleteItemBulkPostForm,
 )
 
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "AddJanCodePostForm",
     "EditItemPostForm",
     "DeleteItemPostForm",
+    "DeleteItemBulkPostForm",
     # Get Form
     "ItemListGetForm",
     "EditItemGetForm",

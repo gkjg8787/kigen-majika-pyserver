@@ -6,7 +6,12 @@ from .additemform import (
 )
 from .itemlist_in_html import ItemListInHTML, ItemListInHTMLResult
 from .edititemform import EditItemInitForm, EditItemFormResult, EditItemForm
-from .deleteitemform import DeleteItemForm, DeleteItemFormResult, DeleteItemInitForm
+from .deleteitemform import (
+    DeleteItemForm,
+    DeleteItemFormResult,
+    DeleteItemInitForm,
+    DeleteItemBulkForm,
+)
 
 __all__ = [
     "AddItemForm",
@@ -21,4 +26,5 @@ __all__ = [
     "DeleteItemForm",
     "DeleteItemFormResult",
     "DeleteItemInitForm",
+    "DeleteItemBulkForm",
 ]
