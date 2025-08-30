@@ -33,6 +33,11 @@ class AddItemFormResult(htmlcontext.HtmlContext):
     expiry_date: datetime | None = None
     local_timezone: str = htmlname.LocalTimeZone.JST
 
+    def __init__(self, jan_code: str | None = None, **kwargs):
+        super().__init__(**kwargs)
+        if jan_code:
+            self.jan_code = jan_code
+
 
 class AddJanCodeFormResult(AddItemFormResult):
     get_msg: str = ""

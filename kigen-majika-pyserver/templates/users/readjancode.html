@@ -1,0 +1,80 @@
+{% extends "shared/base.html" %}
+
+{% block head %}
+    <title>JANコード読み取り</title>
+    <style>
+        #interactive.viewport {
+            position: relative;
+            width: 100%;
+            height: auto;
+            overflow: hidden;
+            text-align: center;
+        }
+        #interactive.viewport canvas, #interactive.viewport video {
+            max-width: 100%;
+            width: 100%;
+        }
+        canvas.drawing, canvas.drawingBuffer {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h1>JANコード読み取り</h1>
+    <p>カメラにJANコードをかざしてください。</p>
+    <div id="interactive" class="viewport"></div>
+    <p><button id="backButton">戻る</button></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromUrl = urlParams.get('from_url');
+            const stype = urlParams.get('stype');
+
+            const backButton = document.getElementById('backButton');
+            backButton.addEventListener('click', () => {
+                window.history.back();
+            });
+
+            Quagga.init({
+                inputStream : {
+                    name : "Live",
+                    type : "LiveStream",
+                    target: document.querySelector('#interactive'),
+                    constraints: {
+                        facingMode: "environment" // "user" for front camera
+                    },
+                },
+                decoder : {
+                    readers : ["ean_reader"]
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    alert("カメラの起動に失敗しました。カメラへのアクセスを許可してください。");
+                    return
+                }
+                console.log("Initialization finished. Ready to start");
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function(result) {
+                const code = result.codeResult.code;
+                console.log("Detected code:", code);
+                Quagga.stop();
+
+                let redirectUrl;
+                if (stype) { // For itemlist page
+                    redirectUrl = `${fromUrl}?stype=${stype}&word=${code}`;
+                } else { // For addjancode page
+                    redirectUrl = `${fromUrl}?jan_code=${code}`;
+                }
+                window.location.href = redirectUrl;
+            });
+        });
+    </script>
+{% endblock %}
