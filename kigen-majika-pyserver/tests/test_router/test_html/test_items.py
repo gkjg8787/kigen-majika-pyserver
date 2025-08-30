@@ -36,7 +36,7 @@ def is_html(text):
     assert "</html>" in text
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items(test_db, mocker):
     itemlistgetform = ItemListGetForm()
     m1 = mocker.patch(
@@ -48,16 +48,35 @@ async def test_read_users_items(test_db, mocker):
     response = client.get(f"{prefix}/", params=itemlistgetform.model_dump_json())
     assert response.status_code == 200
     is_html(response.text)
+    assert "カメラで検索" in response.text
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
+async def test_read_users_items_read_jancode(test_db, mocker):
+    response = client.get(f"{prefix}/readjancode")
+    assert response.status_code == 200
+    is_html(response.text)
+    assert "JANコード読み取り" in response.text
+    assert "interactive" in response.text # for quagga
+    assert "quagga.min.js" in response.text
+
+
+@pytest.mark.anyio
 async def test_read_users_items_add_jancode(test_db, mocker):
     response = client.get(f"{prefix}/add/jancode")
     assert response.status_code == 200
     is_html(response.text)
+    assert "カメラを起動" in response.text
+
+    # test with jan_code query param
+    test_jan_code = "1234567890123"
+    response = client.get(f"{prefix}/add/jancode?jan_code={test_jan_code}")
+    assert response.status_code == 200
+    is_html(response.text)
+    assert f'value="{test_jan_code}"' in response.text
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items_add(test_db, mocker):
     jancodeinfo_dict = {
         "jan_code": "0123456789012",
@@ -71,14 +90,12 @@ async def test_read_users_items_add(test_db, mocker):
         return_value=addjancoderesult,
     )
     addjancodepostform = AddJanCodePostForm(jan_code=jancodeinfo_dict["jan_code"])
-    response = client.post(
-        f"{prefix}/add/", data=json.loads(addjancodepostform.model_dump_json())
-    )
+    response = client.post(f"{prefix}/add/", data=addjancodepostform.model_dump())
     assert response.status_code == 200
     is_html(response.text)
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items_add_post(test_db, mocker):
     name = "test"
     jan_code = "0123456789012"
@@ -98,14 +115,15 @@ async def test_read_users_items_add_post(test_db, mocker):
         expiry_date=None,
         local_timezone=additemresult.local_timezone,
     )
-    response = client.post(
-        f"{prefix}/add/result/", data=json.loads(additempostform.model_dump_json())
-    )
+    post_data = {
+        k: v for k, v in additempostform.model_dump().items() if v is not None
+    }
+    response = client.post(f"{prefix}/add/result/", data=post_data)
     assert response.status_code == 200
     is_html(response.text)
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items_edit(test_db, mocker):
     target_id = 1
     edititemgetform = EditItemGetForm(id=str(target_id))
@@ -120,7 +138,7 @@ async def test_read_users_items_edit(test_db, mocker):
     is_html(response.text)
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items_edit_post(test_db, mocker):
     target_id = 1
     edititempostform = EditItemPostForm(
@@ -142,13 +160,13 @@ async def test_read_users_items_edit_post(test_db, mocker):
         ),
     )
     response = client.post(
-        f"{prefix}/edit/result/", data=json.loads(edititempostform.model_dump_json())
+        f"{prefix}/edit/result/", data=edititempostform.model_dump()
     )
     assert response.status_code == 200
     is_html(response.text)
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items_delete(test_db, mocker):
     target_id = 1
     deleteitempostform = DeleteItemPostForm(id=str(target_id), name="")
@@ -156,14 +174,12 @@ async def test_read_users_items_delete(test_db, mocker):
         "router.html.usecase.deleteitemform.DeleteItemInitForm.execute",
         return_value=DeleteItemFormResult(id=target_id),
     )
-    response = client.post(
-        f"{prefix}/delete/", data=json.loads(deleteitempostform.model_dump_json())
-    )
+    response = client.post(f"{prefix}/delete/", data=deleteitempostform.model_dump())
     assert response.status_code == 200
     is_html(response.text)
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_read_users_items_delete_result(test_db, mocker):
     target_id = 1
     deleteitempostform = DeleteItemPostForm(id=str(target_id), name="test")
@@ -173,7 +189,7 @@ async def test_read_users_items_delete_result(test_db, mocker):
     )
     response = client.post(
         f"{prefix}/delete/result/",
-        data=json.loads(deleteitempostform.model_dump_json()),
+        data=deleteitempostform.model_dump(),
     )
     assert response.status_code == 200
     is_html(response.text)

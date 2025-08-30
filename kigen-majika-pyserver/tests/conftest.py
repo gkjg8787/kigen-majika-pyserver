@@ -12,7 +12,7 @@ from externalfacade.items.items import Base
 from externalfacade import get_async_session
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 async def test_db():
     TEST_DB_URL = URL.create(**DATABASES["default-async"])
     is_echo = DATABASES["is_echo"]

@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Request, Form, Depends, status, HTTPException
 from fastapi.responses import RedirectResponse, HTMLResponse
 
@@ -54,9 +55,18 @@ async def read_users_items(
     return ret
 
 
+@router.get("/readjancode", response_class=HTMLResponse)
+async def read_users_items_read_jancode(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="users/readjancode.html",
+        context={},
+    )
+
+
 @router.get("/add/jancode", response_class=HTMLResponse)
-async def read_users_items_add_jancode(request: Request):
-    context = AddItemFormResult().get_context()
+async def read_users_items_add_jancode(request: Request, jan_code: Optional[str] = None):
+    context = AddItemFormResult(jan_code=jan_code).get_context()
     return templates.TemplateResponse(
         request=request,
         name="users/addjancode.html",

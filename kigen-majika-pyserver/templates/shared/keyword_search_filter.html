@@ -8,6 +8,7 @@
     </select>
     <input type="text" name="{{ INPUT_TEXT_NAME }}" value="{{ INPUT_TEXT_VALUE }}">
     <input type="submit" value="検索">
+    <a href="{{ url_for('read_users_items_read_jancode') }}?from_url={{ url_for('read_users_items') }}&stype=2" class="like_button_link">カメラで検索</a>
     {% for k, v in hidden_input_dict.items() %}
         {% if k != MENU_NAME and v != "" and k != INPUT_TEXT_NAME %}
         <input type="hidden" name="{{ k }}" value="{{ v }}">
